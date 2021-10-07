@@ -113,6 +113,9 @@ def uniform_sphere_S7(bs):
 def uniform_12(bs):
     return np.random.uniform(low=-0.5, high=0.5, size=(bs,12))
 
+def uniform_N(N, bs):
+    return np.random.uniform(low=-0.5, high=0.5, size=(bs, N))
+
 def sphere_7(bs):
     x = np.random.normal(size=(bs,8))
     lam = np.sqrt(np.sum(x**2, axis=1, keepdims=True))
@@ -144,6 +147,21 @@ def N_10000_20000(bs):
     x = np.concatenate([x, x], axis=1)
     return x
 
+def gaussian(N, bs):
+    return np.random.randn(bs, N)
+
 def generate(generator, bs, seed):
     np.random.seed(seed)
     return generator(bs)
+
+
+def generate_datasets(seed, size):
+    np.random.seed(seed)
+    datasets = list()
+    for dim in (1, 10, 100, 1_000, 10_000):
+        datasets.append(uniform_N(dim, size))
+    for dim in (1, 10, 100, 1_000, 10_000):
+        datasets.append(gaussian(dim, size))
+    datasets += [sphere_7(size), uniform_helix_r3(size), swiss_roll_r3(size)]
+
+    return datasets
