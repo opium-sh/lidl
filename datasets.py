@@ -175,12 +175,18 @@ def gaussian(N, bs):
 
 
 def sin(bs):
-    x = np.linspace(0, 10, bs)
-    return (10 * np.sin(x / 3)).reshape(-1, 1)
+    x = np.random.uniform(0, 10, bs)
+    return np.stack([x, (10 * np.sin(x / 3))], axis=1)
 
 
 def sin_quant(bs):
     return np.round(sin(bs))
+
+
+def sin_dequant(bs):
+    x = sin_quant(bs)
+    x += np.random.rand(*x.shape)
+    return x
 
 
 def generate(generator, bs, seed):

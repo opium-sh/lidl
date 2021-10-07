@@ -20,6 +20,7 @@ inputs = {
     "swiss-roll-r3": (datasets.swiss_roll_r3(size), 3),
     "sin": (datasets.sin(size), 2),
     "sin-quant": (datasets.sin_quant(size), 2),
+    "sin-dequant": (datasets.sin_dequant(size), 2),
     "gaussian-1-2": (datasets.N_1_2(size), 2),
     "gaussian-10-20": (datasets.N_10_20(size), 20),
 }
@@ -43,33 +44,41 @@ parser.add_argument(
     "--k",
     default="3",
     type=int,
-    help="number of neighbours in mle (does nothing with different algorithms)",
+    help="number of neighbours in mle (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--delta",
+    default=None,
+    type=str,
+    help="delta for density estimator models (does nothing with other algorithms)",
 )
 
 args = parser.parse_args()
 
 report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.csv"
 f = open(report_filename, "w")
-deltas = [
-    0.010000,
-    0.013895,
-    0.019307,
-    0.026827,
-    0.037276,
-    0.051795,
-    0.071969,
-    0.100000,
-]
-# deltas = [
-#     0.001,
-#     0.05,
-#     0.1,
-#     0.2,
-#     0.4,
-# ]
+
+if args.delta is None:
+    deltas = [
+        0.010000,
+        0.013895,
+        0.019307,
+        0.026827,
+        0.037276,
+        0.051795,
+        0.071969,
+        0.100000,
+    ]
+else:
+    assert args.delta > 0, "delta must be greater than 0"
+    deltas = [args.delta / 2, args.delta, args.delta * 2]
 
 
 data, total_dim = inputs[args.dataset]
+data -= data.mean(axis=0)
+data /= data.std(axis=0) + 0.00001
+
 if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
@@ -81,13 +90,17 @@ elif args.algorithm == "corrdim":
     results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
-    maf.run_on_deltas(deltas, data=data, epochs=500, device="cuda:0", num_layers=5, lr=0.0002)
+    maf.run_on_deltas(
+        deltas, data=data, epochs=500, device="cuda:0", num_layers=10, lr=0.0002
+    )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
     maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
-    rqnsf.run_on_deltas(deltas, data=data, epochs=500, device="cuda:0", num_layers=5, lr=0.0002)
+    rqnsf.run_on_deltas(
+        deltas, data=data, epochs=500, device="cuda:0", num_layers=10, lr=0.0002
+    )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
     rqnsf.save(f"{args.algorithm}_{args.dataset}")
