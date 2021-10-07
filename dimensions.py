@@ -154,4 +154,4 @@ def intrinsic_dim_sample_wise_double_mle(k=5, dist=None):
 
     d = 1.0 / d
     mle = d
-    return mle, np.reciprocal(inv_mle)
+    return mle, inv_mle

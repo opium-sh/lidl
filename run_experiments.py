@@ -1,7 +1,7 @@
 import argparse
 
 import datasets
-from dim_estimators import mle, corr_dim, LIDL
+from dim_estimators import mle_skl, corr_dim, LIDL, mle
 
 size = 1000
 inputs = {
@@ -20,7 +20,7 @@ inputs = {
     "swiss-roll-r3": (datasets.swiss_roll_r3(size), 3),
     "sin": (datasets.sin(size), 2),
     "sin-quant": (datasets.sin_quant(size), 2),
-    "gaussian-1-2": (datasets.N_10_20(size), 2),
+    "gaussian-1-2": (datasets.N_1_2(size), 2),
     "gaussian-10-20": (datasets.N_10_20(size), 20),
 }
 
@@ -93,6 +93,7 @@ elif args.algorithm == "rqnsf":
     rqnsf.save(f"{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
-    results = mle(data, k=args.k, device="cpu")
+    # results = mle(data, k=args.k)
+    results = mle_skl(data, k=args.k)
 
 print("\n".join(map(str, results)), file=f)

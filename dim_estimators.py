@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from scipy.spatial import distance_matrix
 from sklearn import linear_model
+from sklearn.neighbors import NearestNeighbors
 from torch.utils.data import DataLoader
 
 from dimensions import (
@@ -23,6 +24,15 @@ def mle(data, k, batch_size=1024, device="cuda"):
     _, invmle = intrinsic_dim_sample_wise_double_mle(k, dist)
 
     return invmle
+
+def mle_skl(data, k):
+    print("Computing the KNNs")
+    nn = NearestNeighbors(n_neighbors=k+1)
+    nn.fit(data)
+    dist = nn.kneighbors(data)[0]
+    mle, invmle = intrinsic_dim_sample_wise_double_mle(k, dist)
+    return mle
+
 
 
 def corr_dim_per_sample(data, l_perc=0.000001, u_perc=0.01):
