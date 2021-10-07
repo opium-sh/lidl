@@ -2,8 +2,7 @@ import os
 import sys
 import torch
 from torch.utils.data import DataLoader
-sys.path.append(os.path.abspath('./dimensions'))
-from estimators.mle import update_nn, KNNComputerNoCheck, intrinsic_dim_sample_wise_double_mle
+from dimensions import update_nn, KNNComputerNoCheck, intrinsic_dim_sample_wise_double_mle
 from torch.utils.data import Dataset
 from scipy.spatial import distance_matrix
 import numpy as np
