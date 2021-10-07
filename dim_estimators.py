@@ -66,7 +66,7 @@ def corr_dim(data, l_perc=0.000001, u_perc=0.01):
 
     regr = linear_model.LinearRegression()
     regr.fit(np.log10(r_list).reshape(-1, 1), np.log10(C_r_list))
-    return regr.coef_[0]
+    return [regr.coef_[0]] * N
 
 
 class LIDL:
@@ -103,7 +103,7 @@ class LIDL:
             good_inds = ~np.logical_or(np.isnan(lls[i]), np.isinf(lls[i]))
             if ~good_inds.all():
                 print(
-                    f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epochs}"
+                    f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epoch}"
                 )
             ds = np.log(deltas[good_inds])
             ll = lls[i][good_inds]

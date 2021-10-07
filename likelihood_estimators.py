@@ -94,7 +94,7 @@ class LLFlow:
         num_layers=10,
         lr=0.0001,
         epochs=3,
-        device="cuda",
+        device="cpu",
     ):
         train_size = round(data.shape[0] * (1 - test_size))
 
@@ -137,7 +137,7 @@ class LLFlow:
         flow.to(device)
         optimizer = optim.Adam(flow.parameters(), lr=lr)
 
-        for i in tqdm.tqdm(range(epochs + 1)):
+        for _ in tqdm.tqdm(range(epochs + 1)):
             x = train
             x = x + np.random.randn(*x.shape) * delta
             x = torch.tensor(x, dtype=torch.float32).to(device)
@@ -182,7 +182,7 @@ class LLGlow:
         epochs,  # = 200,
         lr,  # = 5e-05,
         img_size=32,
-        device="cuda:0",
+        device="cpu",
         results_path="/home/rm360179/glow-pytorch/",
         ll_batch=64,
         n_channels=1,

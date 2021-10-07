@@ -65,23 +65,25 @@ if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
     gm.run_on_deltas(deltas, data=data, samples=data, runs=1)
-    print(gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim), file=f)
+    results = gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim)
     gm.save(f"{args.dataset}")
 elif args.algorithm == "corrdim":
     print("corrdim", file=f)
-    print(corr_dim(data), file=f)
+    results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     maf.run_on_deltas(deltas, data=data, epochs=200)
     print("maf", file=f)
-    print(maf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim), file=f)
+    results = maf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim)
     maf.save(f"{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     rqnsf.run_on_deltas(deltas, data=data, epochs=200)
     print("rqnsf", file=f)
-    print(rqnsf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim), file=f)
+    results = rqnsf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim)
     rqnsf.save(f"{args.dataset}")
 elif args.algorithm == "mle":
-    print(f"mle, k={args.k}", file=f)
-    print(mle(data, k=args.k, device="cpu"), file=f)
+    print(f"mle:k={args.k}", file=f)
+    results = mle(data, k=args.k, device="cpu")
+
+print("\n".join(map(str, results)), file=f)
