@@ -18,8 +18,10 @@ inputs = {
     "sphere-7": (datasets.sphere_7(size), 8),
     "uniform-helix-r3": (datasets.uniform_helix_r3(size), 3),
     "swiss-roll-r3": (datasets.swiss_roll_r3(size), 3),
-    "sin": (datasets.sin(50), 2),
-    "sin-quant": (datasets.sin_quant(50), 2),
+    "sin": (datasets.sin(size), 2),
+    "sin-quant": (datasets.sin_quant(size), 2),
+    "gaussian-1-2": (datasets.N_10_20(size), 2),
+    "gaussian-10-20": (datasets.N_10_20(size), 20),
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
@@ -46,17 +48,23 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.txt"
+report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.csv"
 f = open(report_filename, "w")
+# deltas = [
+#     0.010000,
+#     0.013895,
+#     0.019307,
+#     0.026827,
+#     0.037276,
+#     0.051795,
+#     0.071969,
+#     0.100000,
+# ]
 deltas = [
-    0.010000,
-    0.013895,
-    0.019307,
-    0.026827,
-    0.037276,
-    0.051795,
-    0.071969,
-    0.100000,
+    0.050000,
+    0.13895,
+    0.219307,
+    0.426827,
 ]
 
 
@@ -64,7 +72,7 @@ data, total_dim = inputs[args.dataset]
 if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1)
+    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="full")
     results = gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim)
     gm.save(f"{args.dataset}")
 elif args.algorithm == "corrdim":

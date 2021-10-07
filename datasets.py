@@ -142,31 +142,31 @@ def sphere_7(bs):
 
 def N_1_2(bs):
     x = np.random.normal(size=(bs, 1))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_10_20(bs):
     x = np.random.normal(size=(bs, 10))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_100_200(bs):
     x = np.random.normal(size=(bs, 100))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_1000_2000(bs):
     x = np.random.normal(size=(bs, 1000))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_10000_20000(bs):
     x = np.random.normal(size=(bs, 10000))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 

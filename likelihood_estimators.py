@@ -24,7 +24,16 @@ class LLGaussianMixtures:
         self.models = defaultdict(list)
         self.results = defaultdict(list)
 
-    def run(self, delta, data, samples, runs=10, test_size=0.25, max_components=30):
+    def run(
+        self,
+        delta,
+        data,
+        samples,
+        runs=10,
+        test_size=0.25,
+        max_components=30,
+        covariance_type="full",
+    ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
         inds = np.arange(data.shape[0])
         np.random.shuffle(inds)
@@ -35,21 +44,25 @@ class LLGaussianMixtures:
         # train = data[:train_size, :]
         # test = data[train_size:, :]
 
-        for _ in tqdm.tqdm(range(runs)):
+        for _ in range(runs):
             n_comps = list(range(1, max_components))
             # Find the optimal number of components from the given range
             ll = list()
             train_with_noise = train + np.random.randn(*train.shape) * delta
             test_with_noise = test + np.random.randn(*test.shape) * delta
-            for n_comp in n_comps:
-                model = GaussianMixture(n_components=n_comp)
+            for n_comp in tqdm.tqdm(n_comps):
+                model = GaussianMixture(
+                    n_components=n_comp, covariance_type=covariance_type
+                )
                 model.fit(train_with_noise)
                 ll.append(model.score(test_with_noise))
 
             best_comps = n_comps[np.argmax(np.array(ll))]
             print(f"Best number of components: {best_comps}")
 
-            model = GaussianMixture(n_components=best_comps)
+            model = GaussianMixture(
+                n_components=n_comp, covariance_type=covariance_type
+            )
             model.fit(data_with_noise)
 
             self.models[delta].append(model)
