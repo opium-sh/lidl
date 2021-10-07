@@ -150,6 +150,13 @@ def N_10000_20000(bs):
 def gaussian(N, bs):
     return np.random.randn(bs, N)
 
+def sin(bs):
+    x = np.linspace(0, 10, bs)
+    return (10 * np.sin(x/3)).reshape(-1, 1)
+
+def sin_quant(bs):
+    return np.round(sin(bs))
+
 def generate(generator, bs, seed):
     np.random.seed(seed)
     return generator(bs)
