@@ -1,7 +1,7 @@
 import argparse
 
 import datasets
-from dim_estimators import mle_skl, corr_dim, LIDL, mle
+from dim_estimators import mle_skl, corr_dim, LIDL
 
 size = 1000
 inputs = {
@@ -50,23 +50,23 @@ args = parser.parse_args()
 
 report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.csv"
 f = open(report_filename, "w")
-# deltas = [
-#     0.010000,
-#     0.013895,
-#     0.019307,
-#     0.026827,
-#     0.037276,
-#     0.051795,
-#     0.071969,
-#     0.100000,
-# ]
 deltas = [
-    0.001,
-    0.05,
-    0.1,
-    0.2,
-    0.4,
+    0.010000,
+    0.013895,
+    0.019307,
+    0.026827,
+    0.037276,
+    0.051795,
+    0.071969,
+    0.100000,
 ]
+# deltas = [
+#     0.001,
+#     0.05,
+#     0.1,
+#     0.2,
+#     0.4,
+# ]
 
 
 data, total_dim = inputs[args.dataset]
@@ -81,16 +81,16 @@ elif args.algorithm == "corrdim":
     results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
-    maf.run_on_deltas(deltas, data=data, epochs=200, device="cuda:0")
+    maf.run_on_deltas(deltas, data=data, epochs=500, device="cuda:0", num_layers=5, lr=0.0002)
     print("maf", file=f)
-    results = maf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim)
-    maf.save(f"{args.dataset}")
+    results = maf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
+    maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
-    rqnsf.run_on_deltas(deltas, data=data, epochs=200)
+    rqnsf.run_on_deltas(deltas, data=data, epochs=500, device="cuda:0", num_layers=5, lr=0.0002)
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim)
-    rqnsf.save(f"{args.dataset}")
+    results = rqnsf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
+    rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
     # results = mle(data, k=args.k)

@@ -58,12 +58,12 @@ class LLGaussianMixtures:
             print(f"Best number of components: {best_comps}")
 
             model = GaussianMixture(
-                n_components=n_comp, covariance_type=covariance_type
+                n_components=best_comps, covariance_type=covariance_type
             )
             model.fit(data_with_noise)
 
             self.models[delta].append(model)
-            self.results[delta].append(model.score_samples(samples))
+            self.results[delta].append(-model.score_samples(samples))
 
     def save(self, name):
         with open(f"{name}_gaussian_mixture.obj", "wb") as f:
