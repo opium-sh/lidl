@@ -28,7 +28,7 @@ class LLGaussianMixtures:
         samples,
         runs=10,
         test_size=0.25,
-        max_components=30,
+        max_components=200,
         covariance_type="full",
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
@@ -42,6 +42,8 @@ class LLGaussianMixtures:
         # test = data[train_size:, :]
 
         for _ in range(runs):
+            best_score = -10000000000000.
+            best_comps = 0
             n_comps = list(range(1, max_components))
             # Find the optimal number of components from the given range
             ll = list()
@@ -52,9 +54,13 @@ class LLGaussianMixtures:
                     n_components=n_comp, covariance_type=covariance_type
                 )
                 model.fit(train_with_noise)
-                ll.append(model.score(test_with_noise))
-
-            best_comps = n_comps[np.argmax(np.array(ll))]
+                score = model.score(test_with_noise)
+                ll.append(score)
+                if score > best_score:
+                    best_score = score
+                    best_comps = n_comp
+                if (n_comp - best_comps) > 10:
+                    break
             print(f"Best number of components: {best_comps}")
 
             model = GaussianMixture(

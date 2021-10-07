@@ -50,13 +50,15 @@ parser.add_argument(
 parser.add_argument(
     "--delta",
     default=None,
-    type=str,
+    type=float,
     help="delta for density estimator models (does nothing with other algorithms)",
 )
 
 args = parser.parse_args()
 
-report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.csv"
+report_filename = (
+    f"report_dim_estimate_{args.algorithm}_{args.dataset}_{args.delta}.csv"
+)
 f = open(report_filename, "w")
 
 if args.delta is None:
@@ -72,12 +74,20 @@ if args.delta is None:
     ]
 else:
     assert args.delta > 0, "delta must be greater than 0"
-    deltas = [args.delta / 2, args.delta, args.delta * 2]
+    deltas = [
+        args.delta / 2.0,
+        args.delta / 1.41,
+        args.delta,
+        args.delta * 1.41,
+        args.delta * 2.0,
+    ]
 
 
 data, total_dim = inputs[args.dataset]
 data -= data.mean(axis=0)
 data /= data.std(axis=0) + 0.00001
+
+print(args)
 
 if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
