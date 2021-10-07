@@ -61,10 +61,11 @@ f = open(report_filename, "w")
 #     0.100000,
 # ]
 deltas = [
-    0.050000,
-    0.13895,
-    0.219307,
-    0.426827,
+    0.001,
+    0.05,
+    0.1,
+    0.2,
+    0.4,
 ]
 
 
@@ -80,7 +81,7 @@ elif args.algorithm == "corrdim":
     results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
-    maf.run_on_deltas(deltas, data=data, epochs=200)
+    maf.run_on_deltas(deltas, data=data, epochs=200, device="cuda:0")
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim)
     maf.save(f"{args.dataset}")

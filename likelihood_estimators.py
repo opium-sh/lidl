@@ -16,9 +16,6 @@ from sklearn.mixture import GaussianMixture
 from torch import optim
 
 
-# add device
-
-
 class LLGaussianMixtures:
     def __init__(self):
         self.models = defaultdict(list)
@@ -162,13 +159,9 @@ class LLFlow:
 
             with torch.no_grad():
                 self.models[delta].append(flow)
-                inp = torch.tensor(test, dtype=torch.float32)
+                inp = torch.tensor(data, dtype=torch.float32).to(device)
                 ll = -flow.log_prob(inp)
-                self.results[delta].append(ll.detach().numpy())
-
-
-# from model import glow
-# from train import train
+                self.results[delta].append(ll.detach().cpu().numpy())
 
 
 class LLGlow:
