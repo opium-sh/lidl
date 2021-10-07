@@ -14,6 +14,7 @@ from torch import optim
 import torch
 import types
 import os
+from collections import defaultdict
 
 
 # add device 
@@ -21,8 +22,8 @@ import os
 
 class LLGaussianMixtures():
     def __init__(self):
-        self.models = dict()
-        self.results = dict()
+        self.models = defaultdict(list)
+        self.results = defaultdict(list)
 
     def run(self,
             delta,
@@ -31,11 +32,12 @@ class LLGaussianMixtures():
             runs=10,
             test_size=0.25,
             max_components=30):
-        train_size = round(data.shape[0] * (1 - test_size))
+        train_size = int(round(data.shape[0] * (1 - test_size)))
         inds = np.arange(data.shape[0])
         np.random.shuffle(inds)
         train = data[inds[:train_size]]
         test = data[inds[train_size:]]
+        data_with_noise = data + np.random.randn(*data.shape) * delta
         
         #train = data[:train_size, :]
         #test = data[train_size:, :]
@@ -44,23 +46,20 @@ class LLGaussianMixtures():
             n_comps = list(range(1, max_components))
             # Find the optimal number of components from the given range
             ll = list()
-            data_with_noise = train + np.random.randn(*train.shape) * delta
+            train_with_noise = train + np.random.randn(*train.shape) * delta
+            test_with_noise = test + np.random.randn(*test.shape) * delta
             for n_comp in n_comps:
                 model = GaussianMixture(n_components=n_comp)
-                model.fit(train)
-                ll.append(model.score(test))
+                model.fit(train_with_noise)
+                ll.append(model.score(test_with_noise))
 
             best_comps = n_comps[np.argmax(np.array(ll))]
+            print(f'Best number of components: {best_comps}')
 
             model = GaussianMixture(n_components=best_comps)
             model.fit(data_with_noise)
-            if delta not in self.models:
-                self.models[delta] = list()
-            self.models[delta].append(model)
 
-            if delta not in self.results:
-                self.results[delta] = list()
-        
+            self.models[delta].append(model)
             self.results[delta].append(model.score_samples(samples))
 
     def save(self, name):
@@ -78,9 +77,9 @@ class LLGaussianMixtures():
 
 class LLFlow():
     def __init__(self, flow_type):
-        self.models = dict()
-        self.results = dict()
-        self.losses = dict()
+        self.models = defaultdict(list)
+        self.results = defaultdict(list)
+        self.losses = defaultdict(list)
         self.flow_type = flow_type
 
     def save(self, name):
@@ -133,16 +132,6 @@ class LLFlow():
         flow = Flow(transform, base_dist)
         flow.to(device)
         optimizer = optim.Adam(flow.parameters(), lr=lr)
-
-
-        if delta not in self.models:
-            self.models[delta] = list()
-
-        if delta not in self.results:
-            self.results[delta] = list()
-
-        if delta not in self.losses:
-            self.losses[delta] = list()
 
 
         for i in tqdm.tqdm(range(epochs + 1)):

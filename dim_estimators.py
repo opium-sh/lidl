@@ -33,7 +33,7 @@ def corr_dim_per_sample(data, l_perc=0.000001, u_perc=0.01):
 
     for r in r_list:
         distances_r = distances <= r
-        print(f'persample, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
+        #print(f'persample, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
         likelihoods = (distances_r.sum(axis=1) - 1)/(N-1)
         rs_samples.append(likelihoods)
 
@@ -58,7 +58,7 @@ def corr_dim(data, l_perc=0.000001, u_perc=0.01):
 
     for r in r_list:
         distances_r = distances <= r
-        print(f'total, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
+        #print(f'total, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
         C_r = 2 * distances_r.sum()/N/(N-1)
         C_r_list.append(C_r)
 
@@ -84,9 +84,12 @@ class LIDL():
         for delta in deltas:
             self.model.run(delta=delta, **model_args)
 
-    def dims_on_deltas(self, deltas, epoch, total_dim):
+    def dims_on_deltas(self, deltas, epochs, total_dim):
         indsort = np.argsort(np.array(deltas))
-        lls = np.array([self.model.results[delta][epoch] for delta in deltas])
+        if isinstance(epochs, dict):
+            lls = np.array([self.model.results[delta][epochs[delta]] for delta in deltas])
+        else:
+            lls = np.array([self.model.results[delta][epochs] for delta in deltas])
         lls = lls[indsort]
         deltas = np.array(deltas)[indsort]
 
@@ -95,6 +98,8 @@ class LIDL():
         dims = list()
         for i in range(lls.shape[0]):
             good_inds = ~np.logical_or(np.isnan(lls[i]), np.isinf(lls[i]))
+            if ~good_inds.all():
+                print(f'[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epochs}')
             ds = np.log(deltas[good_inds])
             ll = lls[i][good_inds]
             if ll.size < 2:
