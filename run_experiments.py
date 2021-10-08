@@ -5,25 +5,25 @@ from dim_estimators import mle_skl, corr_dim, LIDL
 
 size = 1000
 inputs = {
-    "uniform-1": (datasets.uniform_N(1, size), 1),
-    "uniform-10": (datasets.uniform_N(10, size), 10),
-    "uniform-100": (datasets.uniform_N(100, size), 100),
-    "uniform-1000": (datasets.uniform_N(1000, size), 1000),
-    "uniform-10000": (datasets.uniform_N(10000, size), 10000),
-    "gaussian-1": (datasets.gaussian(1, size), 1),
-    "gaussian-10": (datasets.gaussian(10, size), 10),
-    "gaussian-100": (datasets.gaussian(100, size), 100),
-    "gaussian-1000": (datasets.gaussian(1000, size), 1000),
-    "gaussian-10000": (datasets.gaussian(10000, size), 10000),
-    "sphere-7": (datasets.sphere_7(size), 8),
-    "uniform-helix-r3": (datasets.uniform_helix_r3(size), 3),
-    "swiss-roll-r3": (datasets.swiss_roll_r3(size), 3),
-    "sin": (datasets.sin(size), 2),
-    "sin-quant": (datasets.sin_quant(size), 2),
-    "sin-dequant": (datasets.sin_dequant(size), 2),
-    "gaussian-1-2": (datasets.N_1_2(size), 2),
-    "gaussian-10-20": (datasets.N_10_20(size), 20),
-    "lollipop": (datasets.lollipop_dataset(size), 2),
+    "uniform-1": datasets.uniform_N(1, size),
+    "uniform-10": datasets.uniform_N(10, size),
+    "uniform-100": datasets.uniform_N(100, size),
+    "uniform-1000": datasets.uniform_N(1000, size),
+    "uniform-10000": datasets.uniform_N(10000, size),
+    "gaussian-1": datasets.gaussian(1, size),
+    "gaussian-10": datasets.gaussian(10, size),
+    "gaussian-100": datasets.gaussian(100, size),
+    "gaussian-1000": datasets.gaussian(1000, size),
+    "gaussian-10000": datasets.gaussian(10000, size),
+    "sphere-7": datasets.sphere_7(size),
+    "uniform-helix-r3": datasets.uniform_helix_r3(size),
+    "swiss-roll-r3": datasets.swiss_roll_r3(size),
+    "sin": datasets.sin(size),
+    "sin-quant": datasets.sin_quant(size),
+    "sin-dequant": datasets.sin_dequant(size),
+    "gaussian-1-2": datasets.N_1_2(size),
+    "gaussian-10-20": datasets.N_10_20(size),
+    "lollipop": datasets.lollipop_dataset(size)
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
@@ -84,7 +84,7 @@ else:
     ]
 
 
-data, total_dim = inputs[args.dataset]
+data = inputs[args.dataset]
 data -= data.mean(axis=0)
 data /= data.std() + 0.001
 
@@ -94,7 +94,7 @@ if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
     gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="full")
-    results = gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim)
+    results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
     gm.save(f"{args.dataset}")
 elif args.algorithm == "corrdim":
     print("corrdim", file=f)
@@ -105,7 +105,7 @@ elif args.algorithm == "maf":
         deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
     )
     print("maf", file=f)
-    results = maf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
+    results = maf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
     maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
@@ -113,7 +113,7 @@ elif args.algorithm == "rqnsf":
         deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
     )
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
+    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
     rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
