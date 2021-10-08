@@ -9,7 +9,6 @@ parser.add_argument("files", type=argparse.FileType("r"), nargs="+")
 
 args = parser.parse_args()
 
-# algorithms = np.unique([file.name.split("_")[3] for file in args.files])
 algorithms = "mle corrdim gm maf rqnsf".split()
 datasets = np.unique([file.name.split("_")[4] for file in args.files])
 filenames = [file.name.strip() for file in args.files]

@@ -33,14 +33,14 @@ def line_dataset(bs, seed=0):
     return x
 
 
-def parabola_dataset(bs, seed=4):
+def parabola_dataset(bs, seed=0):
     np.random.seed(seed)
     x = np.random.randn(bs, 2) / 2
     x[:, 1] = x[:, 0] ** 2
     return x
 
 
-def parabola_3d_dataset(bs, seed=5):
+def parabola_3d_dataset(bs, seed=0):
     np.random.seed(seed)
     x = np.random.randn(bs, 3) / 2
     x[:, 1] = x[:, 0] ** 2
@@ -48,7 +48,7 @@ def parabola_3d_dataset(bs, seed=5):
     return x
 
 
-def parabola_2d_dataset_in_4d(bs, seed=6):
+def parabola_2d_dataset_in_4d(bs, seed=0):
     np.random.seed(seed)
     x = np.random.randn(bs, 2)
     x[:, 1] = x[:, 0] ** 2
@@ -159,38 +159,10 @@ def sphere_7(bs, seed=0):
     return x
 
 
-def N_1_2(bs, seed=0):
+def gaussian_N_2N(bs, N=1, seed=0):
     np.random.seed(seed)
     x = np.random.normal(size=(bs, 1))
-    x = np.concatenate([x, np.zeros_like(x)], axis=1)
-    return x
-
-
-def N_10_20(bs, seed=0):
-    np.random.seed(seed)
-    x = np.random.normal(size=(bs, 10))
-    x = np.concatenate([x, np.zeros_like(x)], axis=1)
-    return x
-
-
-def N_100_200(bs, seed=0):
-    np.random.seed(seed)
-    x = np.random.normal(size=(bs, 100))
-    x = np.concatenate([x, np.zeros_like(x)], axis=1)
-    return x
-
-
-def N_1000_2000(bs, seed=0):
-    np.random.seed(seed)
-    x = np.random.normal(size=(bs, 1000))
-    x = np.concatenate([x, np.zeros_like(x)], axis=1)
-    return x
-
-
-def N_10000_20000(bs, seed=0):
-    np.random.seed(seed)
-    x = np.random.normal(size=(bs, 10000))
-    x = np.concatenate([x, np.zeros_like(x)], axis=1)
+    x = np.concatenate([x, x], axis=1)
     return x
 
 
@@ -203,6 +175,12 @@ def sin(bs, seed=0):
     np.random.seed(seed)
     x = np.random.uniform(0, 10, bs)
     return np.stack([x, (10 * np.sin(x / 3))], axis=1)
+
+
+def sin_freq(bs, freq=1, seed=0):
+    np.random.seed(seed)
+    x = np.random.uniform(0, 10, bs)
+    return np.stack([x, (np.sin(freq*x/(2 * np.pi)))], axis=1)
 
 
 def sin_quant(bs, seed=0):
@@ -232,3 +210,18 @@ def generate_datasets(seed, size):
     datasets += [sphere_7(size), uniform_helix_r3(size), swiss_roll_r3(size)]
 
     return datasets
+
+
+def sin_dens(bs, freq=5, offset=2.1, seed=0):
+    def fun(x, y, freq, offset):
+        return np.cos(freq * x) + np.cos(freq * y) + offset
+    np.random.seed(seed)
+    sample = np.random.rand(10*bs, 3) * np.array([[2*np.pi, 2*np.pi, offset + 2]]) + np.array([[-np.pi, -np.pi, 0]])
+    resampled = np.array([[point[0], point[1]]
+                          for point in sample
+                          if point[2] < fun(point[0], point[1], freq, offset)
+                         ])
+    assert len(resampled) >= bs
+    resampled = resampled[:bs]
+    resampled = np.concatenate([resampled, np.zeros_like(resampled)], axis=1)
+    return resampled

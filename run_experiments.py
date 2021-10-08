@@ -21,9 +21,21 @@ inputs = {
     "sin": datasets.sin(size),
     "sin-quant": datasets.sin_quant(size),
     "sin-dequant": datasets.sin_dequant(size),
-    "gaussian-1-2": datasets.N_1_2(size),
-    "gaussian-10-20": datasets.N_10_20(size),
-    "lollipop": datasets.lollipop_dataset(size)
+    "gaussian-1-2": datasets.gaussian_N_2N(size, N=1),
+    "gaussian-10-20": datasets.gaussian_N_2N(size, N=10),
+    "gaussian-100-200": datasets.gaussian_N_2N(size, N=100),
+    "gaussian-1000-2000": datasets.gaussian_N_2N(size, N=1000),
+    "gaussian-10000-20000": datasets.gaussian_N_2N(size, N=10000),
+    "lollipop": datasets.lollipop_dataset(size),
+    "sin-10": datasets.sin_freq(size, freq=1.0),
+    "sin-20": datasets.sin_freq(size, freq=2.0),
+    "sin-30": datasets.sin_freq(size, freq=3.0),
+    "sin-50": datasets.sin_freq(size, freq=5.0),
+    "sin-dens-1": datasets.sin_dens(size, freq=1.0),
+    "sin-dens-2": datasets.sin_dens(size, freq=2.0),
+    "sin-dens-4": datasets.sin_dens(size, freq=4.0),
+    "sin-dens-8": datasets.sin_dens(size, freq=8.0),
+    "sin-dens-16": datasets.sin_dens(size, freq=16.0),
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
