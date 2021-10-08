@@ -161,7 +161,7 @@ def sphere_7(bs, seed=0):
 
 def gaussian_N_2N(bs, N=1, seed=0):
     np.random.seed(seed)
-    x = np.random.normal(size=(bs, 1))
+    x = np.random.normal(size=(bs, N))
     x = np.concatenate([x, x], axis=1)
     return x
 

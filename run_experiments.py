@@ -105,7 +105,7 @@ print(args)
 if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="full")
+    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag")
     results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
     gm.save(f"{args.dataset}")
 elif args.algorithm == "corrdim":

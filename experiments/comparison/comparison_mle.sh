@@ -2,10 +2,12 @@ python ../../run_experiments.py --dataset uniform-1 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset uniform-10 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset uniform-100 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset uniform-1000 --algorithm mle --delta 0.05
+python ../../run_experiments.py --dataset uniform-10000 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset gaussian-1 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset gaussian-10 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset gaussian-100 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset gaussian-1000 --algorithm mle --delta 0.05
+python ../../run_experiments.py --dataset gaussian-10000 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset sphere-7 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset uniform-helix-r3 --algorithm mle --delta 0.05
 python ../../run_experiments.py --dataset swiss-roll-r3 --algorithm mle --delta 0.05
