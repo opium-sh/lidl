@@ -54,6 +54,13 @@ parser.add_argument(
     help="dataset which id will be estimated",
 )
 parser.add_argument(
+    "--covariance",
+    default="diag",
+    type=str,
+    choices=['spherical', 'tied', 'diag', 'full'],
+    help="covariance_type for GaussianMixture",
+)
+parser.add_argument(
     "--k",
     default="3",
     type=int,
