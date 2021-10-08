@@ -142,31 +142,31 @@ def sphere_7(bs):
 
 def N_1_2(bs):
     x = np.random.normal(size=(bs, 1))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_10_20(bs):
     x = np.random.normal(size=(bs, 10))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_100_200(bs):
     x = np.random.normal(size=(bs, 100))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_1000_2000(bs):
     x = np.random.normal(size=(bs, 1000))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
 def N_10000_20000(bs):
     x = np.random.normal(size=(bs, 10000))
-    x = np.concatenate([x, x], axis=1)
+    x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
@@ -175,12 +175,18 @@ def gaussian(N, bs):
 
 
 def sin(bs):
-    x = np.linspace(0, 10, bs)
-    return (10 * np.sin(x / 3)).reshape(-1, 1)
+    x = np.random.uniform(0, 10, bs)
+    return np.stack([x, (10 * np.sin(x / 3))], axis=1)
 
 
 def sin_quant(bs):
     return np.round(sin(bs))
+
+
+def sin_dequant(bs):
+    x = sin_quant(bs)
+    x += np.random.rand(*x.shape)
+    return x
 
 
 def generate(generator, bs, seed):

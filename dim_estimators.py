@@ -1,64 +1,34 @@
 import pickle
 
 import numpy as np
-import torch
 from scipy.spatial import distance_matrix
 from sklearn import linear_model
-from torch.utils.data import DataLoader
+from sklearn.neighbors import NearestNeighbors
+from tqdm import tqdm
 
 from dimensions import (
-    update_nn,
-    KNNComputerNoCheck,
     intrinsic_dim_sample_wise_double_mle,
 )
 from likelihood_estimators import LLGaussianMixtures, LLFlow, LLGlow
 
 
-def mle(data, k, batch_size=1024, device="cuda"):
-    data_loader = torch.utils.data.DataLoader(list(zip(data, [0] * data.shape[0])))
+def mle_skl(data, k):
     print("Computing the KNNs")
-    nn_computer = KNNComputerNoCheck(data.shape[0], K=k + 1).to(device)
-    update_nn(data_loader, 0, data_loader, 0, nn_computer, device)
-    dist = nn_computer.min_dists.cpu().numpy()
-    _, invmle = intrinsic_dim_sample_wise_double_mle(k, dist)
-
-    return invmle
-
-
-def corr_dim_per_sample(data, l_perc=0.000001, u_perc=0.01):
-    N = data.shape[0]
-    distances = distance_matrix(data, data, p=2)
-    r_low, r_high = np.quantile(distances[np.triu_indices(N, k=1)], [l_perc, u_perc])
-
-    rs_samples = []
-    r_list = np.linspace(r_low, r_high, 10)
-
-    for r in r_list:
-        distances_r = distances <= r
-        # print(f'persample, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
-        likelihoods = (distances_r.sum(axis=1) - 1) / (N - 1)
-        rs_samples.append(likelihoods)
-
-    samples_rs = np.transpose(np.array(rs_samples))
-    dims_per_sample = list()
-    for i in range(samples_rs.shape[0]):
-        sample_likelihoods = samples_rs[i]
-        regr = linear_model.LinearRegression()
-        regr.fit(np.log10(r_list).reshape(-1, 1), np.log10(sample_likelihoods))
-        dims_per_sample.append(regr.coef_[0])
-
-    return dims_per_sample
+    nn = NearestNeighbors(n_neighbors=k + 1)
+    nn.fit(data)
+    dist = nn.kneighbors(data)[0]
+    mle, invmle = intrinsic_dim_sample_wise_double_mle(k, dist)
+    return mle
 
 
 def corr_dim(data, l_perc=0.000001, u_perc=0.01):
     N = len(data)
     distances = distance_matrix(data, data, p=2)[np.triu_indices(N, k=1)]
     r_low, r_high = np.quantile(distances, [l_perc, u_perc])
-
     C_r_list = []
     r_list = np.linspace(r_low, r_high, 3)
 
-    for r in r_list:
+    for r in tqdm(r_list):
         distances_r = distances <= r
         # print(f'total, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
         C_r = 2 * distances_r.sum() / N / (N - 1)
@@ -66,7 +36,7 @@ def corr_dim(data, l_perc=0.000001, u_perc=0.01):
 
     regr = linear_model.LinearRegression()
     regr.fit(np.log10(r_list).reshape(-1, 1), np.log10(C_r_list))
-    return regr.coef_[0]
+    return [regr.coef_[0]] * N
 
 
 class LIDL:
@@ -103,7 +73,7 @@ class LIDL:
             good_inds = ~np.logical_or(np.isnan(lls[i]), np.isinf(lls[i]))
             if ~good_inds.all():
                 print(
-                    f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epochs}"
+                    f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epoch}"
                 )
             ds = np.log(deltas[good_inds])
             ll = lls[i][good_inds]

@@ -1,7 +1,7 @@
 import argparse
 
 import datasets
-from dim_estimators import mle, corr_dim, LIDL
+from dim_estimators import mle_skl, corr_dim, LIDL
 
 size = 1000
 inputs = {
@@ -18,8 +18,12 @@ inputs = {
     "sphere-7": (datasets.sphere_7(size), 8),
     "uniform-helix-r3": (datasets.uniform_helix_r3(size), 3),
     "swiss-roll-r3": (datasets.swiss_roll_r3(size), 3),
-    "sin": (datasets.sin(50), 2),
-    "sin-quant": (datasets.sin_quant(50), 2),
+    "sin": (datasets.sin(size), 2),
+    "sin-quant": (datasets.sin_quant(size), 2),
+    "sin-dequant": (datasets.sin_dequant(size), 2),
+    "gaussian-1-2": (datasets.N_1_2(size), 2),
+    "gaussian-10-20": (datasets.N_10_20(size), 20),
+    "lollipop": (datasets.lollipop_dataset(size), 2),
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
@@ -41,47 +45,79 @@ parser.add_argument(
     "--k",
     default="3",
     type=int,
-    help="number of neighbours in mle (does nothing with different algorithms)",
+    help="number of neighbours in mle (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--delta",
+    default=None,
+    type=float,
+    help="delta for density estimator models (does nothing with other algorithms)",
 )
 
 args = parser.parse_args()
 
-report_filename = f"report_dim_estimate_{args.algorithm}_{args.dataset}.txt"
+report_filename = (
+    f"report_dim_estimate_{args.algorithm}_{args.dataset}_{args.delta}.csv"
+)
 f = open(report_filename, "w")
-deltas = [
-    0.010000,
-    0.013895,
-    0.019307,
-    0.026827,
-    0.037276,
-    0.051795,
-    0.071969,
-    0.100000,
-]
+
+if args.delta is None:
+    deltas = [
+        0.010000,
+        0.013895,
+        0.019307,
+        0.026827,
+        0.037276,
+        0.051795,
+        0.071969,
+        0.100000,
+    ]
+else:
+    assert args.delta > 0, "delta must be greater than 0"
+    deltas = [
+        args.delta / 2.0,
+        args.delta / 1.41,
+        args.delta,
+        args.delta * 1.41,
+        args.delta * 2.0,
+    ]
 
 
 data, total_dim = inputs[args.dataset]
+data -= data.mean(axis=0)
+data /= data.std() + 0.001
+
+print(args)
+
 if args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1)
-    print(gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim), file=f)
+    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="full")
+    results = gm.dims_on_deltas(deltas, epoch=0, total_dim=total_dim)
     gm.save(f"{args.dataset}")
 elif args.algorithm == "corrdim":
     print("corrdim", file=f)
-    print(corr_dim(data), file=f)
+    results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
-    maf.run_on_deltas(deltas, data=data, epochs=200)
+    maf.run_on_deltas(
+        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
+    )
     print("maf", file=f)
-    print(maf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim), file=f)
-    maf.save(f"{args.dataset}")
+    results = maf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
+    maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
-    rqnsf.run_on_deltas(deltas, data=data, epochs=200)
+    rqnsf.run_on_deltas(
+        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
+    )
     print("rqnsf", file=f)
-    print(rqnsf.dims_on_deltas(deltas, epoch=199, total_dim=total_dim), file=f)
-    rqnsf.save(f"{args.dataset}")
+    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
+    rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
-    print(f"mle, k={args.k}", file=f)
-    print(mle(data, k=args.k, device="cpu"), file=f)
+    print(f"mle:k={args.k}", file=f)
+    # results = mle(data, k=args.k)
+    results = mle_skl(data, k=args.k)
+
+print("\n".join(map(str, results)), file=f)

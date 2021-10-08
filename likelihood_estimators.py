@@ -16,15 +16,21 @@ from sklearn.mixture import GaussianMixture
 from torch import optim
 
 
-# add device
-
-
 class LLGaussianMixtures:
     def __init__(self):
         self.models = defaultdict(list)
         self.results = defaultdict(list)
 
-    def run(self, delta, data, samples, runs=10, test_size=0.25, max_components=30):
+    def run(
+        self,
+        delta,
+        data,
+        samples,
+        runs=10,
+        test_size=0.25,
+        max_components=200,
+        covariance_type="full",
+    ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
         inds = np.arange(data.shape[0])
         np.random.shuffle(inds)
@@ -35,25 +41,35 @@ class LLGaussianMixtures:
         # train = data[:train_size, :]
         # test = data[train_size:, :]
 
-        for _ in tqdm.tqdm(range(runs)):
-            n_comps = list(range(1, max_components))
+        for _ in range(runs):
+            best_score = -np.inf
+            best_comps = 0
+            n_comps = list(range(1, max_components + 1))
             # Find the optimal number of components from the given range
             ll = list()
             train_with_noise = train + np.random.randn(*train.shape) * delta
             test_with_noise = test + np.random.randn(*test.shape) * delta
-            for n_comp in n_comps:
-                model = GaussianMixture(n_components=n_comp)
+            for n_comp in tqdm.tqdm(n_comps):
+                model = GaussianMixture(
+                    n_components=n_comp, covariance_type=covariance_type
+                )
                 model.fit(train_with_noise)
-                ll.append(model.score(test_with_noise))
-
-            best_comps = n_comps[np.argmax(np.array(ll))]
+                score = model.score(test_with_noise)
+                ll.append(score)
+                if score > best_score:
+                    best_score = score
+                    best_comps = n_comp
+                if (n_comp - best_comps) > 10:
+                    break
             print(f"Best number of components: {best_comps}")
 
-            model = GaussianMixture(n_components=best_comps)
+            model = GaussianMixture(
+                n_components=best_comps, covariance_type=covariance_type
+            )
             model.fit(data_with_noise)
 
             self.models[delta].append(model)
-            self.results[delta].append(model.score_samples(samples))
+            self.results[delta].append(-model.score_samples(samples))
 
     def save(self, name):
         with open(f"{name}_gaussian_mixture.obj", "wb") as f:
@@ -94,9 +110,9 @@ class LLFlow:
         num_layers=10,
         lr=0.0001,
         epochs=3,
-        device="cuda",
+        device="cpu",
     ):
-        train_size = round(data.shape[0] * (1 - test_size))
+        train_size = int(round(data.shape[0] * (1 - test_size)))
 
         inds = np.arange(data.shape[0])
         np.random.shuffle(inds)
@@ -137,7 +153,7 @@ class LLFlow:
         flow.to(device)
         optimizer = optim.Adam(flow.parameters(), lr=lr)
 
-        for i in tqdm.tqdm(range(epochs + 1)):
+        for _ in tqdm.tqdm(range(epochs + 1)):
             x = train
             x = x + np.random.randn(*x.shape) * delta
             x = torch.tensor(x, dtype=torch.float32).to(device)
@@ -149,13 +165,9 @@ class LLFlow:
 
             with torch.no_grad():
                 self.models[delta].append(flow)
-                inp = torch.tensor(test, dtype=torch.float32)
+                inp = torch.tensor(data, dtype=torch.float32).to(device)
                 ll = -flow.log_prob(inp)
-                self.results[delta].append(ll.detach().numpy())
-
-
-# from model import glow
-# from train import train
+                self.results[delta].append(ll.detach().cpu().numpy())
 
 
 class LLGlow:
@@ -182,7 +194,7 @@ class LLGlow:
         epochs,  # = 200,
         lr,  # = 5e-05,
         img_size=32,
-        device="cuda:0",
+        device="cpu",
         results_path="/home/rm360179/glow-pytorch/",
         ll_batch=64,
         n_channels=1,
