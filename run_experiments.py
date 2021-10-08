@@ -43,7 +43,7 @@ parser.add_argument(
     "--algorithm",
     default="mle",
     type=str,
-    choices=["mle", "mle_inv", "gm", "rqnsf", "maf", "corrdim"],
+    choices=["mle", "mle-inv", "gm", "rqnsf", "maf", "corrdim"],
     help="name of the algorithm",
 )
 parser.add_argument(
@@ -91,7 +91,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 report_filename = (
-    f"report_dim_estimate_{args.algorithm}_{args.dataset}_{args.delta}.csv"
+    f"report_dim_estimate_{args.algorithm}_{args.dataset}_{args.delta}_{args.k}.csv"
 )
 f = open(report_filename, "w")
 
@@ -135,7 +135,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
+        deltas, data=data, epochs=10000, device=args.device, num_layers=args.layers, lr=0.0001
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
@@ -143,7 +143,7 @@ elif args.algorithm == "maf":
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     rqnsf.run_on_deltas(
-        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
+        deltas, data=data, epochs=10000, device=args.device, num_layers=args.layers, lr=0.0001
     )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
@@ -152,8 +152,8 @@ elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
     # results = mle(data, k=args.k)
     results = mle_skl(data, k=args.k)
-elif args.algorithm == "mle_inv":
-    print(f"mle_inv:k={args.k}", file=f)
+elif args.algorithm == "mle-inv":
+    print(f"mle-inv:k={args.k}", file=f)
     results = mle_inv(data, k=args.k)
 
 print("\n".join(map(str, results)), file=f)

@@ -9,7 +9,7 @@ parser.add_argument("files", type=argparse.FileType("r"), nargs="+")
 
 args = parser.parse_args()
 
-algorithms = "mle corrdim gm maf rqnsf".split()
+algorithms = "mle mle-inv corrdim gm maf rqnsf".split()
 datasets = np.unique([file.name.split("_")[4] for file in args.files])
 filenames = [file.name.strip() for file in args.files]
 
@@ -39,6 +39,6 @@ for dataset in datasets:
             except:
                 print(f"{'error':>9}", end=" ")
         else:
-            raise ValueError("Too many matching files")
+            raise ValueError(f"Too many matching files: {matched}")
     print()
 print("-----")
