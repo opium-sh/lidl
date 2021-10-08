@@ -53,8 +53,11 @@ class LIDL:
             assert False, "incorrect model type"
 
     def run_on_deltas(self, deltas, **model_args):
+        best_epochs = dict()
         for delta in deltas:
-            self.model.run(delta=delta, **model_args)
+            best_epoch = self.model.run(delta=delta, **model_args)
+            best_epochs[delta] = best_epoch
+        return best_epochs
 
     def dims_on_deltas(self, deltas, epoch, total_dim):
         indsort = np.argsort(np.array(deltas))

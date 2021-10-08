@@ -74,6 +74,20 @@ parser.add_argument(
     help="delta for density estimator models (does nothing with other algorithms)",
 )
 
+parser.add_argument(
+    "--device",
+    default="cpu",
+    type=str,
+    help="torch device to run the algorithm on (cpu/cuda) - works only for maf and rqnsf",
+)
+
+parser.add_argument(
+    "--layers",
+    default="2",
+    type=int,
+    help="number of layers in maf/reqnsf"
+)
+
 args = parser.parse_args()
 
 report_filename = (
@@ -120,20 +134,20 @@ elif args.algorithm == "corrdim":
     results = corr_dim(data)
 elif args.algorithm == "maf":
     maf = LIDL("maf")
-    maf.run_on_deltas(
-        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
+    best_epochs = maf.run_on_deltas(
+        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
     )
     print("maf", file=f)
-    results = maf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
-    maf.save(f"{args.algorithm}_{args.dataset}")
+    results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
+    #maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     rqnsf.run_on_deltas(
-        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
+        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
     )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
-    rqnsf.save(f"{args.algorithm}_{args.dataset}")
+    #rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
     # results = mle(data, k=args.k)

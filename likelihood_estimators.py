@@ -14,6 +14,7 @@ from nflows.transforms.base import CompositeTransform
 from nflows.transforms.permutations import ReversePermutation
 from sklearn.mixture import GaussianMixture
 from torch import optim
+from torch.utils.data import DataLoader
 
 
 class LLGaussianMixtures:
@@ -111,6 +112,7 @@ class LLFlow:
         lr=0.0001,
         epochs=3,
         device="cpu",
+        report_test_losses=True
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
 
@@ -153,21 +155,39 @@ class LLFlow:
         flow.to(device)
         optimizer = optim.Adam(flow.parameters(), lr=lr)
 
-        for _ in tqdm.tqdm(range(epochs + 1)):
-            x = train
-            x = x + np.random.randn(*x.shape) * delta
-            x = torch.tensor(x, dtype=torch.float32).to(device)
-            optimizer.zero_grad()
-            loss = -flow.log_prob(inputs=x).mean()
-            loss.backward()
-            optimizer.step()
-            self.losses[delta].append(loss.item())
+        if report_test_losses:
+            losses_file = open(f"{self.flow_type}_{delta}_losses.txt", "w+")
+        best_loss = np.inf
+        best_epoch = 0
+        for epoch in tqdm.tqdm(range(epochs)):
+            dloader = DataLoader(train, batch_size = 128)
+            for x in dloader:
+                x = x + np.random.randn(*x.shape) * delta
+                x = x.to(device, dtype=torch.float32)
+                optimizer.zero_grad()
+                loss = -flow.log_prob(inputs=x).mean()
+                loss.backward()
+                optimizer.step()
 
             with torch.no_grad():
-                self.models[delta].append(flow)
                 inp = torch.tensor(data, dtype=torch.float32).to(device)
                 ll = -flow.log_prob(inp)
                 self.results[delta].append(ll.detach().cpu().numpy())
+
+                test_inp = torch.tensor(test, dtype=torch.float32).to(device)
+                test_loss = -flow.log_prob(inputs=test_inp).mean()
+                self.losses[delta].append(test_loss.detach().cpu().numpy())
+                if report_test_losses:
+                    print(test_loss, file=losses_file)
+                    losses_file.flush()
+
+                if test_loss < best_loss:
+                    best_loss = test_loss
+                    best_epoch = epoch
+
+                if (epoch - best_epoch) > round(epochs * 5 / 100):
+                    print(f"Stopping after {best_epoch} epochs")
+                    return best_epoch
 
 
 class LLGlow:
