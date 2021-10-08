@@ -28,7 +28,7 @@ def corr_dim(data, l_perc=0.000001, u_perc=0.01):
     C_r_list = []
     r_list = np.linspace(r_low, r_high, 3)
 
-    for r in tqdm.tqdm(r_list):
+    for r in tqdm(r_list):
         distances_r = distances <= r
         # print(f'total, r = {r}, percenttrue: {(distances_r.sum())/distances_r.size}')
         C_r = 2 * distances_r.sum() / N / (N - 1)
