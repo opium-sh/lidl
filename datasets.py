@@ -3,19 +3,22 @@ import numpy as np
 import sklearn
 
 
-def moons_dataset(bs):
+def moons_dataset(bs, seed=0):
+    np.random.seed(seed)
     x, y = datasets.make_moons(bs)
     return x
 
 
-def moons_dataset_in_4d(bs):
+def moons_dataset_in_4d(bs, seed=0):
+    np.random.seed(seed)
     x = moons_dataset(bs)
     x_2 = np.zeros_like(x)
     x = np.concatenate([x, x_2], axis=1)
     return x
 
 
-def moons_2d_dataset_in_4d(bs):
+def moons_2d_dataset_in_4d(bs, seed=0):
+    np.random.seed(seed)
     x = moons_dataset(bs)
     x = x + np.random.randn(*x.shape) * 0.05
     x_2 = np.zeros_like(x)
@@ -23,19 +26,22 @@ def moons_2d_dataset_in_4d(bs):
     return x
 
 
-def line_dataset(bs):
+def line_dataset(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.randn(bs, 2) / 2
     x[:, 1] = x[:, 0]
     return x
 
 
 def parabola_dataset(bs, seed=4):
+    np.random.seed(seed)
     x = np.random.randn(bs, 2) / 2
     x[:, 1] = x[:, 0] ** 2
     return x
 
 
 def parabola_3d_dataset(bs, seed=5):
+    np.random.seed(seed)
     x = np.random.randn(bs, 3) / 2
     x[:, 1] = x[:, 0] ** 2
     x[:, 2] = 1.0
@@ -43,6 +49,7 @@ def parabola_3d_dataset(bs, seed=5):
 
 
 def parabola_2d_dataset_in_4d(bs, seed=6):
+    np.random.seed(seed)
     x = np.random.randn(bs, 2)
     x[:, 1] = x[:, 0] ** 2
     x = x + np.random.randn(*x.shape) * 0.5
@@ -51,7 +58,8 @@ def parabola_2d_dataset_in_4d(bs, seed=6):
     return x
 
 
-def parabola_2d_dataset_in_10d(bs):
+def parabola_2d_dataset_in_10d(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.randn(bs, 2)
     x[:, 1] = x[:, 0] ** 2
     x = x + np.random.randn(*x.shape) * 0.5
@@ -60,7 +68,8 @@ def parabola_2d_dataset_in_10d(bs):
     return x
 
 
-def parabola_6d_dataset_in_18d(bs):
+def parabola_6d_dataset_in_18d(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.randn(bs, 6)
     x[:, 1] = x[:, 0] ** 2
     x[:, 2] = x[:, 0] ** 2
@@ -72,14 +81,16 @@ def parabola_6d_dataset_in_18d(bs):
     return x
 
 
-def s_dataset_in_6d(bs):
+def s_dataset_in_6d(bs, seed=0):
+    np.random.seed(seed)
     x = datasets.make_s_curve(bs)[0]
     x_2 = np.zeros_like(x)
     x = np.concatenate([x, x_2], axis=1)
     return x
 
 
-def spirals_dataset(bs):
+def spirals_dataset(bs, seed=0):
+    np.random.seed(seed)
     n = np.sqrt(np.random.rand(bs // 2, 1)) * 540 * (2 * np.pi) / 360
     d1x = -np.cos(n) * n
     d1y = np.sin(n) * n
@@ -87,7 +98,8 @@ def spirals_dataset(bs):
     return x
 
 
-def lollipop_dataset(bs):
+def lollipop_dataset(bs, seed=0):
+    np.random.seed(seed)
     cs = int(0.95 * bs)
     r = np.random.uniform(size=cs)
     fi = np.random.uniform(0, 2 * np.pi, size=cs)
@@ -101,7 +113,8 @@ def lollipop_dataset(bs):
     return x
 
 
-def uniform_helix_r3(bs):
+def uniform_helix_r3(bs, seed=0):
+    np.random.seed(seed)
     x = np.zeros((bs, 3))
     t = np.random.uniform(-1, 1, size=bs)
     x[:, 0] = np.sin(np.pi * t)
@@ -110,80 +123,95 @@ def uniform_helix_r3(bs):
     return x
 
 
-def swiss_roll_r3(bs):
+def swiss_roll_r3(bs, seed=0):
+    np.random.seed(seed)
     x = sklearn.datasets.make_swiss_roll(bs)[0]
     x -= x.mean(axis=0).reshape(1, 3)
     x /= x.std(axis=0).reshape(1, 3)
     return x
 
 
-def N_5(bs):
+def N_5(bs, seed=0):
+    np.random.seed(seed)
     return np.random.normal(size=(bs, 5))
 
 
-def uniform_sphere_S7(bs):
+def uniform_sphere_S7(bs, seed=0):
+    np.random.seed(seed)
     pass
 
 
-def uniform_12(bs):
+def uniform_12(bs, seed=0):
+    np.random.seed(seed)
     return np.random.uniform(low=-0.5, high=0.5, size=(bs, 12))
 
 
-def uniform_N(N, bs):
+def uniform_N(N, bs, seed=0):
+    np.random.seed(seed)
     return np.random.uniform(low=-0.5, high=0.5, size=(bs, N))
 
 
-def sphere_7(bs):
+def sphere_7(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 8))
     lam = np.sqrt(np.sum(x ** 2, axis=1, keepdims=True))
     x = x / lam
     return x
 
 
-def N_1_2(bs):
+def N_1_2(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 1))
     x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
-def N_10_20(bs):
+def N_10_20(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 10))
     x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
-def N_100_200(bs):
+def N_100_200(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 100))
     x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
-def N_1000_2000(bs):
+def N_1000_2000(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 1000))
     x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
-def N_10000_20000(bs):
+def N_10000_20000(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.normal(size=(bs, 10000))
     x = np.concatenate([x, np.zeros_like(x)], axis=1)
     return x
 
 
-def gaussian(N, bs):
+def gaussian(N, bs, seed=0):
+    np.random.seed(seed)
     return np.random.randn(bs, N)
 
 
-def sin(bs):
+def sin(bs, seed=0):
+    np.random.seed(seed)
     x = np.random.uniform(0, 10, bs)
     return np.stack([x, (10 * np.sin(x / 3))], axis=1)
 
 
-def sin_quant(bs):
+def sin_quant(bs, seed=0):
+    np.random.seed(seed)
     return np.round(sin(bs))
 
 
-def sin_dequant(bs):
+def sin_dequant(bs, seed=0):
+    np.random.seed(seed)
     x = sin_quant(bs)
     x += np.random.rand(*x.shape)
     return x
