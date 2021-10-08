@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
-parser.add_argument('files', type=argparse.FileType('r'), nargs='+')
+parser.add_argument("files", type=argparse.FileType("r"), nargs="+")
 
 args = parser.parse_args()
 
