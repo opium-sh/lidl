@@ -112,7 +112,10 @@ class LLFlow:
         lr=0.0001,
         epochs=3,
         device="cpu",
-        report_test_losses=True
+        report_test_losses=True,
+        hidden_maf=2,
+        blocks_maf=5,
+        hidden_rqnsf=1
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
 
@@ -131,16 +134,16 @@ class LLFlow:
             if self.flow_type == "rqnsf":
                 transforms.append(
                     MaskedAffineAutoregressiveTransform(
-                        features=data.shape[1], hidden_features=5 * data.shape[1]
+                        features=data.shape[1], hidden_features=hidden_rqnsf * data.shape[1]
                     )
                 )
             elif self.flow_type == "maf":
                 transforms.append(
                     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(
                         features=data.shape[1],
-                        hidden_features=15 * data.shape[1],
+                        hidden_features=hidden_maf * data.shape[1],
                         num_bins=5,
-                        num_blocks=5,
+                        num_blocks=blocks_maf,
                         tails="linear",
                         tail_bound=4,
                         use_batch_norm=False,

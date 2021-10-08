@@ -83,9 +83,30 @@ parser.add_argument(
 
 parser.add_argument(
     "--layers",
-    default="2",
+    default="10",
     type=int,
     help="number of layers in maf/reqnsf"
+)
+
+parser.add_argument(
+    "--hidden_maf",
+    default="2",
+    type=int,
+    help="number of hidden layers in maf"
+)
+
+parser.add_argument(
+    "--blocks_maf",
+    default="3",
+    type=int,
+    help="number of blocks in maf"
+)
+
+parser.add_argument(
+    "--hidden_rqnsf",
+    default="1",
+    type=int,
+    help="number of hidden layers in rqnsf"
 )
 
 args = parser.parse_args()
@@ -135,18 +156,18 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
+        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002, hidden_maf=args.hidden_maf, blocks_maf=args.blocks_maf
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
     #maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
-    rqnsf.run_on_deltas(
-        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002
+    best_epochs = rqnsf.run_on_deltas(
+        deltas, data=data, epochs=1500, device=args.device, num_layers=args.layers, lr=0.0002, hidden_rqnsf=args.hidden_rqnsf,
     )
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
+    results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
     #rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
