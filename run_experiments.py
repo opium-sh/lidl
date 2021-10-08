@@ -23,6 +23,7 @@ inputs = {
     "sin-dequant": (datasets.sin_dequant(size), 2),
     "gaussian-1-2": (datasets.N_1_2(size), 2),
     "gaussian-10-20": (datasets.N_10_20(size), 20),
+    "lollipop": (datasets.lollipop_dataset(size), 2),
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
@@ -85,7 +86,7 @@ else:
 
 data, total_dim = inputs[args.dataset]
 data -= data.mean(axis=0)
-data /= data.std(axis=0) + 0.00001
+data /= data.std() + 0.001
 
 print(args)
 
@@ -101,18 +102,18 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     maf.run_on_deltas(
-        deltas, data=data, epochs=500, device="cuda:0", num_layers=10, lr=0.0002
+        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
     )
     print("maf", file=f)
-    results = maf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
+    results = maf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
     maf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     rqnsf.run_on_deltas(
-        deltas, data=data, epochs=500, device="cuda:0", num_layers=10, lr=0.0002
+        deltas, data=data, epochs=1500, device="cuda:0", num_layers=10, lr=0.0002
     )
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=499, total_dim=total_dim)
+    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=total_dim)
     rqnsf.save(f"{args.algorithm}_{args.dataset}")
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)

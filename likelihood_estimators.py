@@ -42,7 +42,7 @@ class LLGaussianMixtures:
         # test = data[train_size:, :]
 
         for _ in range(runs):
-            best_score = -10000000000000.
+            best_score = -10000000000000.0
             best_comps = 0
             n_comps = list(range(1, max_components))
             # Find the optimal number of components from the given range
@@ -106,7 +106,7 @@ class LLFlow:
         self,
         delta,
         data,
-        test_size=0.1,
+        test_size=0.25,
         num_layers=10,
         lr=0.0001,
         epochs=3,
