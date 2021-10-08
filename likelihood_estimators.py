@@ -14,6 +14,7 @@ from nflows.transforms.base import CompositeTransform
 from nflows.transforms.permutations import ReversePermutation
 from sklearn.mixture import GaussianMixture
 from torch import optim
+from torch.utils.data import DataLoader
 
 
 class LLGaussianMixtures:
@@ -159,13 +160,14 @@ class LLFlow:
         best_loss = np.inf
         best_epoch = 0
         for epoch in tqdm.tqdm(range(epochs)):
-            x = train
-            x = x + np.random.randn(*x.shape) * delta
-            x = torch.tensor(x, dtype=torch.float32).to(device)
-            optimizer.zero_grad()
-            loss = -flow.log_prob(inputs=x).mean()
-            loss.backward()
-            optimizer.step()
+            dloader = DataLoader(train, batch_size = 128)
+            for x in dloader:
+                x = x + np.random.randn(*x.shape) * delta
+                x = x.to(device, dtype=torch.float32)
+                optimizer.zero_grad()
+                loss = -flow.log_prob(inputs=x).mean()
+                loss.backward()
+                optimizer.step()
 
             with torch.no_grad():
                 inp = torch.tensor(data, dtype=torch.float32).to(device)
