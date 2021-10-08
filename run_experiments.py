@@ -1,7 +1,7 @@
 import argparse
 
 import datasets
-from dim_estimators import mle_skl, corr_dim, LIDL
+from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 
 size = 1000
 inputs = {
@@ -43,7 +43,7 @@ parser.add_argument(
     "--algorithm",
     default="mle",
     type=str,
-    choices=["mle", "gm", "rqnsf", "maf", "corrdim"],
+    choices=["mle", "mle_inv", "gm", "rqnsf", "maf", "corrdim"],
     help="name of the algorithm",
 )
 parser.add_argument(
@@ -64,7 +64,7 @@ parser.add_argument(
     "--k",
     default="3",
     type=int,
-    help="number of neighbours in mle (does nothing with other algorithms)",
+    help="number of neighbours in mle and mle_inv (does nothing with other algorithms)",
 )
 
 parser.add_argument(
@@ -152,5 +152,8 @@ elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
     # results = mle(data, k=args.k)
     results = mle_skl(data, k=args.k)
+elif args.algorithm == "mle_inv":
+    print(f"mle_inv:k={args.k}", file=f)
+    results = mle_inv(data, k=args.k)
 
 print("\n".join(map(str, results)), file=f)

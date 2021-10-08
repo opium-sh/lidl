@@ -21,6 +21,15 @@ def mle_skl(data, k):
     return mle
 
 
+def mle_inv(data, k):
+    print("Computing the KNNs")
+    nn = NearestNeighbors(n_neighbors=k + 1)
+    nn.fit(data)
+    dist = nn.kneighbors(data)[0]
+    mle, invmle = intrinsic_dim_sample_wise_double_mle(k, dist)
+    return [1.0 / invmle.mean()] * data.shape[0]
+
+
 def corr_dim(data, l_perc=0.000001, u_perc=0.01):
     N = len(data)
     distances = distance_matrix(data, data, p=2)[np.triu_indices(N, k=1)]
