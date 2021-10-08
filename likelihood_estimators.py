@@ -42,9 +42,9 @@ class LLGaussianMixtures:
         # test = data[train_size:, :]
 
         for _ in range(runs):
-            best_score = -10000000000000.0
+            best_score = -np.inf
             best_comps = 0
-            n_comps = list(range(1, max_components))
+            n_comps = list(range(1, max_components + 1))
             # Find the optimal number of components from the given range
             ll = list()
             train_with_noise = train + np.random.randn(*train.shape) * delta
@@ -106,13 +106,13 @@ class LLFlow:
         self,
         delta,
         data,
-        test_size=0.25,
+        test_size=0.1,
         num_layers=10,
         lr=0.0001,
         epochs=3,
         device="cpu",
     ):
-        train_size = round(data.shape[0] * (1 - test_size))
+        train_size = int(round(data.shape[0] * (1 - test_size)))
 
         inds = np.arange(data.shape[0])
         np.random.shuffle(inds)
