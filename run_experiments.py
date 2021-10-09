@@ -3,40 +3,39 @@ import argparse
 import datasets
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 
-size = 10000
 inputs = {
-    "uniform-1": datasets.uniform_N(1, size),
-    "uniform-10": datasets.uniform_N(10, size),
-    "uniform-100": datasets.uniform_N(100, size),
-    "uniform-1000": datasets.uniform_N(1000, size),
-    "uniform-10000": datasets.uniform_N(10000, size),
-    "gaussian-1": datasets.gaussian(1, size),
-    "gaussian-10": datasets.gaussian(10, size),
-    "gaussian-100": datasets.gaussian(100, size),
-    "gaussian-1000": datasets.gaussian(1000, size),
-    "gaussian-10000": datasets.gaussian(10000, size),
-    "sphere-7": datasets.sphere_7(size),
-    "uniform-helix-r3": datasets.uniform_helix_r3(size),
-    "swiss-roll-r3": datasets.swiss_roll_r3(size),
-    "sin": datasets.sin(size),
-    "sin-quant": datasets.sin_quant(size),
-    "sin-dequant": datasets.sin_dequant(size),
-    "gaussian-1-2": datasets.gaussian_N_2N(size, N=1),
-    "gaussian-10-20": datasets.gaussian_N_2N(size, N=10),
-    "gaussian-100-200": datasets.gaussian_N_2N(size, N=100),
-    "gaussian-1000-2000": datasets.gaussian_N_2N(size, N=1000),
-    "gaussian-10000-20000": datasets.gaussian_N_2N(size, N=10000),
-    "lollipop": datasets.lollipop_dataset(size),
-    "lollipop-0": datasets.lollipop_dataset_0(size),
-    "sin-10": datasets.sin_freq(size, freq=1.0),
-    "sin-20": datasets.sin_freq(size, freq=2.0),
-    "sin-30": datasets.sin_freq(size, freq=3.0),
-    "sin-50": datasets.sin_freq(size, freq=5.0),
-    "sin-dens-1": datasets.sin_dens(size, freq=1.0),
-    "sin-dens-2": datasets.sin_dens(size, freq=2.0),
-    "sin-dens-4": datasets.sin_dens(size, freq=4.0),
-    "sin-dens-8": datasets.sin_dens(size, freq=8.0),
-    "sin-dens-16": datasets.sin_dens(size, freq=16.0),
+    "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
+    "uniform-10": lambda size, seed: datasets.uniform_N(10, size, seed=seed),
+    "uniform-100": lambda size, seed: datasets.uniform_N(100, size, seed=seed),
+    "uniform-1000": lambda size, seed: datasets.uniform_N(1000, size, seed=seed),
+    "uniform-10000": lambda size, seed: datasets.uniform_N(10000, size, seed=seed),
+    "gaussian-1": lambda size, seed: datasets.gaussian(1, size, seed=seed),
+    "gaussian-10": lambda size, seed: datasets.gaussian(10, size, seed=seed),
+    "gaussian-100": lambda size, seed: datasets.gaussian(100, size, seed=seed),
+    "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
+    "gaussian-10000": lambda size, seed: datasets.gaussian(10000, size, seed=seed),
+    "sphere-7": lambda size, seed: datasets.sphere_7(size, seed=seed),
+    "uniform-helix-r3": lambda size, seed: datasets.uniform_helix_r3(size, seed=seed),
+    "swiss-roll-r3": lambda size, seed: datasets.swiss_roll_r3(size, seed=seed),
+    "sin": lambda size, seed: datasets.sin(size, seed=seed),
+    "sin-quant": lambda size, seed: datasets.sin_quant(size, seed=seed),
+    "sin-dequant": lambda size, seed: datasets.sin_dequant(size, seed=seed),
+    "gaussian-1-2": lambda size, seed: datasets.gaussian_N_2N(size, N=1, seed=seed),
+    "gaussian-10-20": lambda size, seed: datasets.gaussian_N_2N(size, N=10, seed=seed),
+    "gaussian-100-200": lambda size, seed: datasets.gaussian_N_2N(size, N=100, seed=seed),
+    "gaussian-1000-2000": lambda size, seed: datasets.gaussian_N_2N(size, N=1000, seed=seed),
+    "gaussian-10000-20000": lambda size, seed: datasets.gaussian_N_2N(size, N=10000, seed=seed),
+    "lollipop": lambda size, seed: datasets.lollipop_dataset(size, seed=seed),
+    "lollipop-0": lambda size, seed: datasets.lollipop_dataset_0(size, seed=seed),
+    "sin-10": lambda size, seed: datasets.sin_freq(size, freq=1.0, seed=seed),
+    "sin-20": lambda size, seed: datasets.sin_freq(size, freq=2.0, seed=seed),
+    "sin-30": lambda size, seed: datasets.sin_freq(size, freq=3.0, seed=seed),
+    "sin-50": lambda size, seed: datasets.sin_freq(size, freq=5.0, seed=seed),
+    "sin-dens-1": lambda size, seed: datasets.sin_dens(size, freq=1.0, seed=seed),
+    "sin-dens-2": lambda size, seed: datasets.sin_dens(size, freq=2.0, seed=seed),
+    "sin-dens-4": lambda size, seed: datasets.sin_dens(size, freq=4.0, seed=seed),
+    "sin-dens-8": lambda size, seed: datasets.sin_dens(size, freq=8.0, seed=seed),
+    "sin-dens-16": lambda size, seed: datasets.sin_dens(size, freq=16.0, seed=seed),
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
@@ -89,6 +88,20 @@ parser.add_argument(
     help="number of layers in maf/reqnsf"
 )
 
+parser.add_argument(
+    "--size",
+    default="1000",
+    type=int,
+    help="number of samples in each dataset (number of rows)"
+)
+
+parser.add_argument(
+    "--seed",
+    default="0",
+    type=int,
+    help="seed for each dataset generator"
+)
+
 args = parser.parse_args()
 
 argname = "_".join([f"{k}:{v}" for k, v in vars(args).items()])
@@ -120,7 +133,7 @@ else:
     ]
 
 
-data = inputs[args.dataset]
+data = inputs[args.dataset](size=args.size, seed=args.seed)
 data -= data.mean(axis=0)
 data /= data.std() + 0.001
 
