@@ -128,13 +128,13 @@ class LLFlow:
         transforms = []
         for _ in range(num_layers):
             transforms.append(ReversePermutation(features=data.shape[1]))
-            if self.flow_type == "rqnsf":
+            if self.flow_type == "maf":
                 transforms.append(
                     MaskedAffineAutoregressiveTransform(
                         features=data.shape[1], hidden_features=5 * data.shape[1]
                     )
                 )
-            elif self.flow_type == "maf":
+            elif self.flow_type == "rqnsf":
                 transforms.append(
                     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(
                         features=data.shape[1],
@@ -142,7 +142,7 @@ class LLFlow:
                         num_bins=5,
                         num_blocks=5,
                         tails="linear",
-                        tail_bound=4,
+                        tail_bound=5,
                         use_batch_norm=False,
                     )
                 )
@@ -160,7 +160,7 @@ class LLFlow:
         best_loss = np.inf
         best_epoch = 0
         for epoch in tqdm.tqdm(range(epochs)):
-            dloader = DataLoader(train, batch_size = 128)
+            dloader = DataLoader(train, batch_size=256)
             for x in dloader:
                 x = x + np.random.randn(*x.shape) * delta
                 x = x.to(device, dtype=torch.float32)
@@ -178,14 +178,14 @@ class LLFlow:
                 test_loss = -flow.log_prob(inputs=test_inp).mean()
                 self.losses[delta].append(test_loss.detach().cpu().numpy())
                 if report_test_losses:
-                    print(test_loss, file=losses_file)
+                    print(test_loss.item(), file=losses_file)
                     losses_file.flush()
 
                 if test_loss < best_loss:
                     best_loss = test_loss
                     best_epoch = epoch
 
-                if (epoch - best_epoch) > round(epochs * 5 / 100):
+                if (epoch - best_epoch) > round(epochs * 2 / 100):
                     print(f"Stopping after {best_epoch} epochs")
                     return best_epoch
 

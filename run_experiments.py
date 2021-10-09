@@ -3,7 +3,7 @@ import argparse
 import datasets
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 
-size = 1000
+size = 10000
 inputs = {
     "uniform-1": datasets.uniform_N(1, size),
     "uniform-10": datasets.uniform_N(10, size),
@@ -27,6 +27,7 @@ inputs = {
     "gaussian-1000-2000": datasets.gaussian_N_2N(size, N=1000),
     "gaussian-10000-20000": datasets.gaussian_N_2N(size, N=10000),
     "lollipop": datasets.lollipop_dataset(size),
+    "lollipop-0": datasets.lollipop_dataset_0(size),
     "sin-10": datasets.sin_freq(size, freq=1.0),
     "sin-20": datasets.sin_freq(size, freq=2.0),
     "sin-30": datasets.sin_freq(size, freq=3.0),
@@ -83,15 +84,17 @@ parser.add_argument(
 
 parser.add_argument(
     "--layers",
-    default="2",
+    default="4",
     type=int,
     help="number of layers in maf/reqnsf"
 )
 
 args = parser.parse_args()
 
+argname = "_".join([f"{k}:{v}" for k, v in vars(args).items()])
+
 report_filename = (
-    f"report_dim_estimate_{args.algorithm}_{args.dataset}_{args.delta}_{args.k}.csv"
+    f"report_dim_estimate_{argname}.csv"
 )
 f = open(report_filename, "w")
 
@@ -129,9 +132,11 @@ if args.algorithm == "gm":
     gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag")
     results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
     gm.save(f"{args.dataset}")
+
 elif args.algorithm == "corrdim":
     print("corrdim", file=f)
     results = corr_dim(data)
+
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
@@ -140,18 +145,21 @@ elif args.algorithm == "maf":
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
     #maf.save(f"{args.algorithm}_{args.dataset}")
+
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
-    rqnsf.run_on_deltas(
+    best_epochs = rqnsf.run_on_deltas(
         deltas, data=data, epochs=10000, device=args.device, num_layers=args.layers, lr=0.0001
     )
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=1499, total_dim=data.shape[1])
+    results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
     #rqnsf.save(f"{args.algorithm}_{args.dataset}")
+
 elif args.algorithm == "mle":
     print(f"mle:k={args.k}", file=f)
     # results = mle(data, k=args.k)
     results = mle_skl(data, k=args.k)
+
 elif args.algorithm == "mle-inv":
     print(f"mle-inv:k={args.k}", file=f)
     results = mle_inv(data, k=args.k)
