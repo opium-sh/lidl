@@ -1,9 +1,6 @@
 python ../../run_experiments.py --dataset sphere-7 --algorithm corrdim --delta 0.05
 python ../../run_experiments.py --dataset uniform-helix-r3 --algorithm corrdim --delta 0.05
 python ../../run_experiments.py --dataset swiss-roll-r3 --algorithm corrdim --delta 0.05
-python ../../run_experiments.py --dataset sin --algorithm corrdim --delta 0.05
-python ../../run_experiments.py --dataset sin-quant --algorithm corrdim --delta 0.05
-python ../../run_experiments.py --dataset sin-dequant --algorithm corrdim --delta 0.05
 python ../../run_experiments.py --dataset uniform-1 --algorithm corrdim --delta 0.05
 python ../../run_experiments.py --dataset uniform-10 --algorithm corrdim --delta 0.05
 python ../../run_experiments.py --dataset uniform-100 --algorithm corrdim --delta 0.05
