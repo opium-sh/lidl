@@ -1,6 +1,7 @@
 import argparse
 
 import datasets
+from datasets import normalize
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 
 inputs = {
@@ -31,6 +32,7 @@ inputs = {
     "sin-20": lambda size, seed: datasets.sin_freq(size, freq=2.0, seed=seed),
     "sin-30": lambda size, seed: datasets.sin_freq(size, freq=3.0, seed=seed),
     "sin-50": lambda size, seed: datasets.sin_freq(size, freq=5.0, seed=seed),
+    "sin-80": lambda size, seed: datasets.sin_freq(size, freq=8.0, seed=seed),
     "sin-dens-1": lambda size, seed: datasets.sin_dens(size, freq=1.0, seed=seed),
     "sin-dens-2": lambda size, seed: datasets.sin_dens(size, freq=2.0, seed=seed),
     "sin-dens-4": lambda size, seed: datasets.sin_dens(size, freq=4.0, seed=seed),
@@ -76,7 +78,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--deltas",
-    required = False,
+    required=False,
     default=None,
     type=str,
     help="all deltas for density estimator models separated by a comma (does nothing with other algorithms)",
@@ -111,14 +113,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--num_layers",
-    default="20",
-    type=int,
-    help="number of layers in maf/rqnsf"
-)
-
-parser.add_argument(
-    "--hidden_maf",
+    "--hidden",
     default="5",
     type=int,
     help="number of hidden features in maf"
@@ -133,7 +128,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--epochs",
-    default=1000,
+    default=10000,
     type=int,
     help="number of epochs"
 )
@@ -179,9 +174,7 @@ else:
 
 
 data = inputs[args.dataset](size=args.size, seed=args.seed)
-data -= data.mean(axis=0)
-data /= data.std() + 0.001
-
+data = normalize(data)
 print(args)
 
 if args.algorithm == "gm":
@@ -198,7 +191,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden_maf, epochs=args.epochs
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
@@ -207,7 +200,7 @@ elif args.algorithm == "maf":
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     best_epochs = rqnsf.run_on_deltas(
-        deltas, data=data, epochs=10000, device=args.device, num_layers=args.layers, lr=args.lr
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs
     )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])

@@ -1,6 +1,12 @@
-from sklearn import datasets
 import numpy as np
 import sklearn
+from sklearn import datasets
+
+
+def normalize(data):
+    data -= data.mean(axis=0)
+    data /= data.std() + 0.001
+    return data
 
 
 def moons_dataset(bs, seed=0):
@@ -194,10 +200,10 @@ def sin(bs, seed=0):
     return np.stack([x, (10 * np.sin(x / 3))], axis=1)
 
 
-def sin_freq(bs, freq=1, seed=0):
+def sin_freq(bs, freq=5, seed=0):
     np.random.seed(seed)
-    x = np.random.uniform(0, 10, bs)
-    return np.stack([x, (np.sin(freq*x/(2 * np.pi)))], axis=1)
+    x = np.random.uniform(0, 1, bs)
+    return np.stack([x, np.sin(freq*x*(2 * np.pi))], axis=1)
 
 
 def sin_quant(bs, seed=0):

@@ -139,7 +139,7 @@ class LLFlow:
                 transforms.append(
                     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(
                         features=data.shape[1],
-                        hidden_features=15 * data.shape[1],
+                        hidden_features=hidden * data.shape[1],
                         num_bins=5,
                         num_blocks=5,
                         tails="linear",
