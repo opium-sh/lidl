@@ -112,6 +112,7 @@ class LLFlow:
         lr=0.0001,
         epochs=3,
         device="cpu",
+        hidden=5,
         report_test_losses=True
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
@@ -131,7 +132,7 @@ class LLFlow:
             if self.flow_type == "maf":
                 transforms.append(
                     MaskedAffineAutoregressiveTransform(
-                        features=data.shape[1], hidden_features=5 * data.shape[1]
+                        features=data.shape[1], hidden_features=hidden * data.shape[1]
                     )
                 )
             elif self.flow_type == "rqnsf":
