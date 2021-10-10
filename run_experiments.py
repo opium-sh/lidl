@@ -75,6 +75,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--deltas",
+    required = False,
+    default=None,
+    type=str,
+    help="all deltas for density estimator models separated by a comma (does nothing with other algorithms)",
+)
+
+parser.add_argument(
     "--device",
     default="cpu",
     type=str,
@@ -133,7 +141,24 @@ report_filename = (
 )
 f = open(report_filename, "w")
 
-if args.delta is None:
+if args.deltas is not None:
+    ldeltas = args.deltas.split(',')
+    deltas = list()
+    assert len(ldeltas) >= 2
+    for delta in ldeltas:
+        fdelta = float(delta)
+        assert fdelta > 0
+        deltas.append(fdelta)
+elif args.delta is not None:
+    assert args.delta > 0, "delta must be greater than 0"
+    deltas = [
+        args.delta / 2.0,
+        args.delta / 1.41,
+        args.delta,
+        args.delta * 1.41,
+        args.delta * 2.0,
+    ]
+else:
     deltas = [
         0.010000,
         0.013895,
@@ -143,15 +168,6 @@ if args.delta is None:
         0.051795,
         0.071969,
         0.100000,
-    ]
-else:
-    assert args.delta > 0, "delta must be greater than 0"
-    deltas = [
-        args.delta / 2.0,
-        args.delta / 1.41,
-        args.delta,
-        args.delta * 1.41,
-        args.delta * 2.0,
     ]
 
 
