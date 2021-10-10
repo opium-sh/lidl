@@ -189,6 +189,7 @@ class LLFlow:
                 if (epoch - best_epoch) > round(epochs * 2 / 100):
                     print(f"Stopping after {best_epoch} epochs")
                     return best_epoch
+        return best_epoch
 
 
 class LLGlow:
