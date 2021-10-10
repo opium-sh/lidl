@@ -131,6 +131,13 @@ parser.add_argument(
     help="learning rate"
 )
 
+parser.add_argument(
+    "--epochs",
+    default=1000,
+    type=int,
+    help="number of epochs"
+)
+
 
 args = parser.parse_args()
 
@@ -191,7 +198,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, epochs=10000, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden_maf
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden_maf, epochs=args.epochs
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
