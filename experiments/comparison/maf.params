@@ -11,5 +11,5 @@
 --dataset gaussian-1000 --algorithm maf --delta 0.05 --epochs=2000
 --dataset gaussian-1-2 --algorithm maf --delta 0.05 --epochs=2000
 --dataset gaussian-10-20 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-100-200 --algorithm maf --deltas='0.08,0.09157,0.10483,0.12' --hidden_maf=2 --lr=0.00002 --layers=4 -- device=cuda --epochs=2000
---dataset gaussian-1000-2000 --algorithm maf --deltas='0.08,0.09157,0.10483,0.12' --hidden_maf=2 --lr=0.00002 --layers=4 --device=cuda --epochs=2000
+--dataset gaussian-100-200 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden_maf=2 --lr=0.00002 --layers=4 -- device=cuda --epochs=2000
+--dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden_maf=2 --lr=0.00002 --layers=4 --device=cuda --epochs=2000
