@@ -113,7 +113,9 @@ class LLFlow:
         epochs=3,
         device="cpu",
         hidden=5,
-        report_test_losses=True
+        batch_size=256,
+        num_blocks=5,
+        report_test_losses=True,
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
 
@@ -132,14 +134,14 @@ class LLFlow:
             if self.flow_type == "maf":
                 transforms.append(
                     MaskedAffineAutoregressiveTransform(
-                        features=data.shape[1], hidden_features=hidden * data.shape[1]
+                        features=data.shape[1], hidden_features=int(round(hidden * data.shape[1]))
                     )
                 )
             elif self.flow_type == "rqnsf":
                 transforms.append(
                     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(
                         features=data.shape[1],
-                        hidden_features=hidden * data.shape[1],
+                        hidden_features=int(round(hidden * data.shape[1])),
                         num_bins=5,
                         num_blocks=5,
                         tails="linear",
@@ -161,7 +163,7 @@ class LLFlow:
         best_loss = np.inf
         best_epoch = 0
         for epoch in tqdm.tqdm(range(epochs)):
-            dloader = DataLoader(train, batch_size=256)
+            dloader = DataLoader(train, batch_size=batch_size)
             for x in dloader:
                 x = x + np.random.randn(*x.shape) * delta
                 x = x.to(device, dtype=torch.float32)
