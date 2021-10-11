@@ -1,6 +1,8 @@
-bash run_gpu.sh corrdim.params 0
-bash run_gpu.sh maf.params 0
-bash run_gpu.sh mle-inv.params 0
-bash run_gpu.sh mle.params 0
-bash run_gpu.sh rqnsf.params 0
-bash run_gpu.sh run.params 0
+for seed in {0..9}; do
+  bash run_gpu.sh corrdim.params $seed;
+  bash run_gpu.sh maf.params $seed;
+  bash run_gpu.sh mle-inv.params $seed;
+  bash run_gpu.sh mle.params $seed;
+  bash run_gpu.sh rqnsf.params $seed;
+  bash run_gpu.sh run.params $seed;
+done;
