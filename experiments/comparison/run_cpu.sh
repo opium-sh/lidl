@@ -7,5 +7,5 @@ fi
 params=$1
 seed=$2
 while IFS= read -r line; do
-    python ../../run_experiments.py $line --seed=$seed &
+    python ../../run_experiments.py $line --seed=$seed >> experiment_log &
 done < $params

@@ -1,15 +1,19 @@
---dataset sphere-7 --algorithm maf --delta 0.05 --epochs=2000
---dataset uniform-helix-r3 --algorithm maf --delta 0.05 --epochs=2000
---dataset swiss-roll-r3 --algorithm maf --delta 0.05 --epochs=2000
---dataset uniform-1 --algorithm maf --delta 0.05 --epochs=2000
---dataset uniform-10 --algorithm maf --delta 0.05 --epochs=2000
---dataset uniform-100 --algorithm maf --delta 0.05 --epochs=2000
---dataset uniform-1000 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-1 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-10 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-100 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-1000 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-1-2 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-10-20 --algorithm maf --delta 0.05 --epochs=2000
---dataset gaussian-100-200 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden_maf=2 --lr=0.00002 --layers=4 -- device=cuda --epochs=2000
---dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden_maf=2 --lr=0.00002 --layers=4 --device=cuda --epochs=2000
+--dataset sphere-7 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-helix-r3 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset swiss-roll-r3 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-1 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-12 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-10 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-100 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset uniform-1000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-1 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-5 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-10 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-100 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-1000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-1-2 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-10-20 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --epochs=2000
+--dataset gaussian-100-200 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.00002 --layers=4 --device=cuda --epochs=2000
+--dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.00002 --layers=4 --device=cuda --epochs=20000
+--dataset gaussian-1000-2000 --algorithm maf --delta=0.05 --hidden=2 --lr=0.0000005 --layers=4 --device=cuda --epochs=10000
+--dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.000002 --layers=4 --device=cuda --epochs=20000
