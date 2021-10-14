@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 import sklearn
 from sklearn import datasets
+from sklearn.preprocessing import StandardScaler
 
 
 def normalize(data):
@@ -248,3 +250,12 @@ def sin_dens(bs, freq=5, offset=2.1, seed=0):
     resampled = resampled[:bs]
     resampled = np.concatenate([resampled, np.zeros_like(resampled)], axis=1)
     return resampled
+
+def csv_dataset(path):
+    df = pd.read_csv(path, header=None, delim_whitespace=True)
+    x = df.iloc[:, :-1].values
+    print(x.shape)
+    x_scaler = StandardScaler()
+    x_scaler.fit(x)
+    x = x_scaler.transform(x)
+    return x
