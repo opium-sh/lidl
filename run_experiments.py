@@ -7,10 +7,12 @@ from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
     "uniform-10": lambda size, seed: datasets.uniform_N(10, size, seed=seed),
+    "uniform-12": lambda size, seed: datasets.uniform_N(12, size, seed=seed),
     "uniform-100": lambda size, seed: datasets.uniform_N(100, size, seed=seed),
     "uniform-1000": lambda size, seed: datasets.uniform_N(1000, size, seed=seed),
     "uniform-10000": lambda size, seed: datasets.uniform_N(10000, size, seed=seed),
     "gaussian-1": lambda size, seed: datasets.gaussian(1, size, seed=seed),
+    "gaussian-5": lambda size, seed: datasets.gaussian(5, size, seed=seed),
     "gaussian-10": lambda size, seed: datasets.gaussian(10, size, seed=seed),
     "gaussian-100": lambda size, seed: datasets.gaussian(100, size, seed=seed),
     "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
