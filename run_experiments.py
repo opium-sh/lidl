@@ -50,16 +50,46 @@ inputs = {
     "sin-dens-12": lambda size, seed: datasets.sin_dens(size, freq=12.0, seed=seed),
     "sin-dens-14": lambda size, seed: datasets.sin_dens(size, freq=14.0, seed=seed),
     "sin-dens-16": lambda size, seed: datasets.sin_dens(size, freq=16.0, seed=seed),
-    "boston": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/boston_housing.txt"),
-    "protein": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/protein.txt"),
-    "wine": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/wine.txt"),
-    "power": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/power.txt"),
-    "yacht": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/yacht.txt"),
-    "concrete": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/concrete.txt"),
-    "energy": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/energy_heating_load.txt"),
-    "kin8nm": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/kin8nm.txt"),
-    "naval": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/naval_compressor_decay.txt"),
-    "year": lambda size, seed: datasets.csv_dataset("~/phd/ProbAI/homework/dt8122-2021/datasets/year_prediction_msd.txt"),
+    "boston": lambda size, seed: datasets.csv_dataset(
+        # path to boston_housing dataset here
+        "~/datasets/boston_housing.txt"
+    ),
+    "protein": lambda size, seed: datasets.csv_dataset(
+        # path to protein dataset here
+        "~/datasets/protein.txt"
+    ),
+    "wine": lambda size, seed: datasets.csv_dataset(
+        # path to wine dataset here
+        "~/datasets/wine.txt"
+    ),
+    "power": lambda size, seed: datasets.csv_dataset(
+        # path to power dataset here
+        "~/datasets/power.txt"
+    ),
+    "yacht": lambda size, seed: datasets.csv_dataset(
+        # path to yacht dataset here
+        "~/datasets/yacht.txt"
+    ),
+    "concrete": lambda size, seed: datasets.csv_dataset(
+        # path to concrete dataset here
+        "~/datasets/concrete.txt"
+    ),
+    "energy": lambda size, seed: datasets.csv_dataset(
+        # path to enery_heating_load dataset here
+        "~/datasets/energy_heating_load.txt"
+    ),
+    "kin8nm": lambda size, seed: datasets.csv_dataset(
+        # path to kin8nm dataset here
+        "~/datasets/kin8nm.txt"
+    ),
+    "naval": lambda size, seed: datasets.csv_dataset(
+        # path to naval_compressor_decay dataset here
+        "~/datasets/naval_compressor_decay.txt"
+    ),
+    "year": lambda size, seed: datasets.csv_dataset(
+        # path to year_prediction_msd dataset here
+        "~/datasets/year_prediction_msd.txt"
+    )
 }
 
 parser = argparse.ArgumentParser(description="LIDL experiments")
