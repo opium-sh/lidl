@@ -19,3 +19,4 @@
 --dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.000002 --layers=4 --device=cuda --epochs=20000
 
 --dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.00002 --layers=2 --device=cuda --epochs=2000 --bs=1024
+--dataset gaussian-1000-2000 --algorithm maf --deltas=0.08,0.09157,0.10483,0.12 --hidden=2 --lr=0.00002 --layers=2 --device=cuda --epochs=20000 --bs=1024 --size=10000

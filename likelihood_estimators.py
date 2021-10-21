@@ -116,6 +116,7 @@ class LLFlow:
         batch_size=256,
         num_blocks=5,
         report_test_losses=True,
+        test_losses_name='',
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
 
@@ -159,7 +160,10 @@ class LLFlow:
         optimizer = optim.Adam(flow.parameters(), lr=lr)
 
         if report_test_losses:
-            losses_file = open(f"{self.flow_type}_{delta}_losses.txt", "w+")
+            if test_losses_name == '':
+                losses_file = open(f"{self.flow_type}_{delta}_losses.txt", "w+")
+            else:
+                losses_file = open(f"{test_losses_name}_{delta}_losses.txt", "w+")
         best_loss = np.inf
         best_epoch = 0
         for epoch in tqdm.tqdm(range(epochs)):

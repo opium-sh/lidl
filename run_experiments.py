@@ -206,7 +206,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
