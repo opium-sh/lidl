@@ -144,7 +144,7 @@ class LLFlow:
                         features=data.shape[1],
                         hidden_features=int(round(hidden * data.shape[1])),
                         num_bins=5,
-                        num_blocks=5,
+                        num_blocks=num_blocks,
                         tails="linear",
                         tail_bound=5,
                         use_batch_norm=False,
