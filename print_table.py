@@ -34,11 +34,19 @@ def print_table(results, rownames, colnames, row_width=20):
         print()
     print("-----------------------------")
 
-parser = argparse.ArgumentParser(description="LIDL experiments")
-parser.add_argument("files", type=argparse.FileType("r"), nargs="+")
-args = parser.parse_args()
+from os import listdir
+from os.path import isfile, join
 
-filenames = [f.name.strip() for f in args.files]
+
+parser = argparse.ArgumentParser(description="LIDL experiments")
+parser.add_argument("--files", type=argparse.FileType("r"), nargs="+")
+parser.add_argument("--dir", type=str, default=None)
+args = parser.parse_args()
+if args.dir is not None:
+    filenames = [join(args.dir, f) for f in listdir(args.dir) if isfile(join(args.dir, f))]
+elif args.files is not None:
+    filenames = [f.name.strip() for f in args.files]
+
 datasets = np.unique(extract_datasets(filenames))
 algorithms = "mle mle-inv corrdim gm maf rqnsf".split()
 
