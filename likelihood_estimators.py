@@ -223,7 +223,7 @@ class LLGlow:
         lr,  # = 5e-05,
         img_size=32,
         device="cpu",
-        results_path="~/rm360179/glow-pytorch/",
+        results_path="~/glow-pytorch/",
         ll_batch=64,
         n_channels=1,
         n_flow=32,
