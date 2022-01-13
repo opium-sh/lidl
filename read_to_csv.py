@@ -28,6 +28,6 @@ for run_id in ids_with_tag:
     lids = run['lids'].fetch_values()
 
 
-    filename = f'{dataset}_{algorithm}_{seed}.csv'
+    filename = f'{dataset}:{algorithm}:{seed}.csv'
     nplids = lids.value.to_numpy()
     np.savetxt(filename, nplids, delimiter=",")
