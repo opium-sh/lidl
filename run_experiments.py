@@ -4,6 +4,7 @@ from datasets import normalize
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 import numpy as np
 import neptune.new as neptune
+import skdim
 
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
@@ -93,12 +94,27 @@ inputs = {
     )
 }
 
+skdim_algorithms = {
+        'skdim_corrint': skdim.id.CorrInt,
+        'skdim_danco': skdim.id.DANCo,
+        'skdim_ess': skdim.id.ESS,
+        'skdim_fishers': skdim.id.FisherS,
+        'skdim_knn': skdim.id.KNN,
+        'skdim_lpca': skdim.id.lPCA,
+        'skdim_mada': skdim.id.MADA,
+        'skdim_mind_ml':skdim.id.MiND_ML,
+        'skdim_mle':skdim.id.MLE,
+        'skdim_mom':skdim.id.MOM,
+        'skdim_tle': skdim.id.TLE,
+        'skdim_twonn': skdim.id.TwoNN,
+}
+
 parser = argparse.ArgumentParser(description="LIDL experiments")
 parser.add_argument(
     "--algorithm",
     default="mle",
     type=str,
-    choices=["mle", "mle-inv", "gm", "rqnsf", "maf", "corrdim"],
+    choices=["mle", "mle-inv", "gm", "rqnsf", "maf", "corrdim"] + list(skdim_algorithms.keys()),
     help="name of the algorithm",
 )
 parser.add_argument(
@@ -134,6 +150,13 @@ parser.add_argument(
     default=None,
     type=int,
     help="number of deltas for density estimator models (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--gdim",
+    default=False,
+    type=bool,
+    help="should skdim try to estimate global dim?",
 )
 
 parser.add_argument(
@@ -234,7 +257,8 @@ args = parser.parse_args()
 not_in_filename = [
         'neptune_token',
         'neptune_name',
-        'ground_truth_const']
+        'ground_truth_const',
+        'gdim']
 argname = "_".join([f"{k}:{v}" for k, v in vars(args).items() if not k in not_in_filename])
 
 report_filename = (
@@ -279,7 +303,27 @@ data = inputs[args.dataset](size=args.size, seed=args.seed)
 data = normalize(data)
 print(args)
 
-if args.algorithm == "gm":
+if not (args.neptune_name is None or args.neptune_token is None):
+    run = neptune.init(
+            project=args.neptune_name,
+            api_token=args.neptune_token,
+            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py', 'run_experiments.py'],
+    )
+
+if args.algorithm in skdim_algorithms:
+    print(args.algorithm, file=f)
+    params = {}
+
+    model = skdim_algorithms[args.algorithm](**params)
+    ldims = model.fit_transform_pw(data)
+
+    if args.gdim:
+        model = skdim_algorithms[args.algorithm](**params)
+        gdim = model.fit_transformw(data)
+
+    results = ldims
+
+elif args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
     gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag")
@@ -318,12 +362,8 @@ elif args.algorithm == "mle-inv":
     results = mle_inv(data, k=args.k)
 
 print("\n".join(map(str, results)), file=f)
+
 if not (args.neptune_name is None or args.neptune_token is None):
-    run = neptune.init(
-            project=args.neptune_name,
-            api_token=args.neptune_token,
-            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py'],
-    )
     for key, value in vars(args).items():
         run[key] = value
     for lid in results:
@@ -333,5 +373,7 @@ if not (args.neptune_name is None or args.neptune_token is None):
             return ((a - b) ** 2).mean()
         mse_val = mse(np.array(results), np.full(len(results), args.ground_truth_const))
         run['mse'] = mse_val
+    if args.algorithm in skdim_algorithms and args.gdim:
+        run['gdim'] = gdim
     run.stop()
 
