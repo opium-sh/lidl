@@ -24,9 +24,10 @@ for run_id in ids_with_tag:
     ##### run['fieldname'].fetch_values() for series 
     algorithm = run['algorithm'].fetch()
     dataset = run['dataset'].fetch()
+    seed = run['seed'].fetch()
     lids = run['lids'].fetch_values()
 
 
-    filename = f'{dataset}_{algorithm}.csv'
+    filename = f'{dataset}_{algorithm}_{seed}.csv'
     nplids = lids.value.to_numpy()
     np.savetxt(filename, nplids, delimiter=",")
