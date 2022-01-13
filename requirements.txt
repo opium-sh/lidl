@@ -6,3 +6,5 @@ scipy==1.5.2
 torch==1.6.0
 torchvision==0.7.0
 tqdm==4.48.2
+neptune-client
+scikit-dimension
