@@ -1,8 +1,9 @@
 import argparse
-
 import datasets
 from datasets import normalize
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
+import numpy as np
+import neptune.new as neptune
 
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
@@ -129,11 +130,40 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--num_deltas",
+    default=None,
+    type=int,
+    help="number of deltas for density estimator models (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--neptune_name",
+    default=None,
+    type=str,
+    help="name of the project you want to log to <YOUR_WORKSPACE>/<YOUR_PROJECT>",
+)
+
+parser.add_argument(
+    "--neptune_token",
+    default=None,
+    type=str,
+    help="token to your project",
+)
+
+parser.add_argument(
     "--deltas",
     required=False,
     default=None,
     type=str,
     help="all deltas for density estimator models separated by a comma (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--ground_truth_const",
+    required=False,
+    default=None,
+    type=int,
+    help="if the dimension is constant in every item, you can estimate mse by adding this argument",
 )
 
 parser.add_argument(
@@ -201,7 +231,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-argname = "_".join([f"{k}:{v}" for k, v in vars(args).items()])
+not_in_filename = [
+        'neptune_token',
+        'neptune_name',
+        'ground_truth_const']
+argname = "_".join([f"{k}:{v}" for k, v in vars(args).items() if not k in not_in_filename])
 
 report_filename = (
     f"report_dim_estimate_{argname}.csv"
@@ -218,13 +252,16 @@ if args.deltas is not None:
         deltas.append(fdelta)
 elif args.delta is not None:
     assert args.delta > 0, "delta must be greater than 0"
-    deltas = [
-        args.delta / 2.0,
-        args.delta / 1.41,
-        args.delta,
-        args.delta * 1.41,
-        args.delta * 2.0,
-    ]
+    if args.num_deltas is None:
+        deltas = [
+            args.delta / 2.0,
+            args.delta / 1.41,
+            args.delta,
+            args.delta * 1.41,
+            args.delta * 2.0,
+        ]
+    else:
+        deltas = np.geomspace(args.delta/2, args.delta*2, args.num_deltas)
 else:
     deltas = [
         0.010000,
@@ -281,3 +318,20 @@ elif args.algorithm == "mle-inv":
     results = mle_inv(data, k=args.k)
 
 print("\n".join(map(str, results)), file=f)
+if not (args.neptune_name is None or args.neptune_token is None):
+    run = neptune.init(
+            project=args.neptune_name,
+            api_token=args.neptune_token,
+            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py'],
+    )
+    for key, value in vars(args).items():
+        run[key] = value
+    for lid in results:
+        run['lids'].log(lid)
+    if args.ground_truth_const is not None:
+        def mse(a, b):
+            return ((a - b) ** 2).mean()
+        mse_val = mse(np.array(results), np.full(len(results), args.ground_truth_const))
+        run['mse'] = mse_val
+    run.stop()
+
