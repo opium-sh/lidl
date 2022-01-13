@@ -176,6 +176,11 @@ def uniform_N(N, bs, seed=0):
     return np.random.uniform(low=-0.5, high=0.5, size=(bs, N))
 
 
+def uniform_N_0_1(N, bs, seed=0):
+    np.random.seed(seed)
+    return np.random.uniform(low=0., high=1., size=(bs, N))
+
+
 def sphere_7(bs, seed=0):
     np.random.seed(seed)
     x = np.random.normal(size=(bs, 8))
