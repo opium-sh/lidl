@@ -308,8 +308,10 @@ if not (args.neptune_name is None or args.neptune_token is None):
     run = neptune.init(
             project=args.neptune_name,
             api_token=args.neptune_token,
-            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py', 'run_experiments.py'],
+            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py', 'run_experiments.py', 's3.sh'],
     )
+    for key, value in vars(args).items():
+        run[key] = value
 
 if args.algorithm in skdim_algorithms:
     print(args.algorithm, file=f)
@@ -365,8 +367,6 @@ elif args.algorithm == "mle-inv":
 print("\n".join(map(str, results)), file=f)
 
 if not (args.neptune_name is None or args.neptune_token is None):
-    for key, value in vars(args).items():
-        run[key] = value
     for lid in results:
         run['lids'].log(lid)
     if args.ground_truth_const is not None:
