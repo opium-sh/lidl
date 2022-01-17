@@ -1,7 +1,7 @@
 import neptune.new as neptune
 import numpy as np
 # pick which experiments you want to see (by tag)
-TAG = 'chart'
+TAG = '10k_samples-smaller_datasets'
 
 ################################
 project = neptune.get_project(
@@ -29,5 +29,6 @@ for run_id in ids_with_tag:
 
 
     filename = f'{dataset}:{algorithm}:{seed}.csv'
-    nplids = lids.value.to_numpy()
-    np.savetxt(filename, nplids, delimiter=",")
+    if len(lids) > 0:
+        nplids = lids.value.to_numpy()
+        np.savetxt(filename, nplids, delimiter=",")
