@@ -29,6 +29,7 @@ inputs = {
     "gaussian-1-2": lambda size, seed: datasets.gaussian_N_2N(size, N=1, seed=seed),
     "gaussian-10-20": lambda size, seed: datasets.gaussian_N_2N(size, N=10, seed=seed),
     "gaussian-100-200": lambda size, seed: datasets.gaussian_N_2N(size, N=100, seed=seed),
+    "gaussian-500-1000": lambda size, seed: datasets.gaussian_N_2N(size, N=500, seed=seed),
     "gaussian-1000-2000": lambda size, seed: datasets.gaussian_N_2N(size, N=1000, seed=seed),
     "gaussian-10000-20000": lambda size, seed: datasets.gaussian_N_2N(size, N=10000, seed=seed),
     "lollipop": lambda size, seed: datasets.lollipop_dataset(size, seed=seed),
