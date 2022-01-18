@@ -254,6 +254,13 @@ parser.add_argument(
     help="number of blocks in rqnsf"
 )
 
+parser.add_argument(
+    "--json_params",
+    default=None,
+    type=str,
+    help="arguments to skdim"
+)
+
 args = parser.parse_args()
 
 not_in_filename = [
@@ -316,7 +323,13 @@ if not (args.neptune_name is None or args.neptune_token is None):
 
 if args.algorithm in skdim_algorithms:
     print(args.algorithm, file=f)
-    params = {}
+    if args.json_params is not None:
+        with f as open(args.json_params):
+            params = json.load(f)
+    else:
+        params = {}
+    if not (args.neptune_name is None or args.neptune_token is None):
+        run['skdim_params'] = vars(params)
 
     model = skdim_algorithms[args.algorithm](**params)
     ldims = model.fit_transform_pw(data)
