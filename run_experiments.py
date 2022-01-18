@@ -274,7 +274,6 @@ argname = "_".join([f"{k}:{v}" for k, v in vars(args).items() if not k in not_in
 report_filename = (
     f"report_dim_estimate_{argname}.csv"
 )
-f = open(report_filename, "w")
 
 if args.deltas is not None:
     ldeltas = args.deltas.split(',')
@@ -379,7 +378,6 @@ elif args.algorithm == "mle-inv":
     print(f"mle-inv:k={args.k}", file=f)
     results = mle_inv(data, k=args.k)
 
-print("\n".join(map(str, results)), file=f)
 
 if not (args.neptune_name is None or args.neptune_token is None):
     for lid in results:
@@ -393,3 +391,5 @@ if not (args.neptune_name is None or args.neptune_token is None):
         run['gdim'] = gdim
     run.stop()
 
+f = open(report_filename, "w")
+print("\n".join(map(str, results)), file=f)
