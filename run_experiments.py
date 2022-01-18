@@ -321,11 +321,12 @@ if not (args.neptune_name is None or args.neptune_token is None):
     for key, value in vars(args).items():
         run[key] = value
 
+f = open(report_filename, "w")
 if args.algorithm in skdim_algorithms:
     print(args.algorithm, file=f)
     if args.json_params is not None:
-        with open(args.json_params) as f:
-            params = json.load(f)
+        with open(args.json_params) as f_skdim_args:
+            params = json.load(f_skdim_args)
     else:
         params = dict()
     if not (args.neptune_name is None or args.neptune_token is None):
@@ -391,5 +392,4 @@ if not (args.neptune_name is None or args.neptune_token is None):
         run['gdim'] = gdim
     run.stop()
 
-f = open(report_filename, "w")
 print("\n".join(map(str, results)), file=f)
