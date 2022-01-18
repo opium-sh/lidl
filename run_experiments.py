@@ -5,6 +5,7 @@ from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
 import numpy as np
 import neptune.new as neptune
 import skdim
+import json
 
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
@@ -324,12 +325,12 @@ if not (args.neptune_name is None or args.neptune_token is None):
 if args.algorithm in skdim_algorithms:
     print(args.algorithm, file=f)
     if args.json_params is not None:
-        with f as open(args.json_params):
+        with open(args.json_params) as f:
             params = json.load(f)
     else:
-        params = {}
+        params = dict()
     if not (args.neptune_name is None or args.neptune_token is None):
-        run['skdim_params'] = vars(params)
+        run['skdim_params'] = params
 
     model = skdim_algorithms[args.algorithm](**params)
     ldims = model.fit_transform_pw(data)
