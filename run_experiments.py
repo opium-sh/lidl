@@ -20,6 +20,7 @@ inputs = {
     "gaussian-10": lambda size, seed: datasets.gaussian(10, size, seed=seed),
     "gaussian-100": lambda size, seed: datasets.gaussian(100, size, seed=seed),
     "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
+    "gaussian-2000": lambda size, seed: datasets.gaussian(2000, size, seed=seed),
     "gaussian-10000": lambda size, seed: datasets.gaussian(10000, size, seed=seed),
     "sphere-7": lambda size, seed: datasets.sphere_7(size, seed=seed),
     "uniform-helix-r3": lambda size, seed: datasets.uniform_helix_r3(size, seed=seed),
@@ -309,8 +310,8 @@ else:
 
 
 data = inputs[args.dataset](size=args.size, seed=args.seed)
-data = normalize(data)
-print(args)
+#data = normalize(data)
+#print(args)
 
 if not (args.neptune_name is None or args.neptune_token is None):
     run = neptune.init(
