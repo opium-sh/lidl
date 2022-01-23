@@ -19,6 +19,7 @@ inputs = {
     "gaussian-5": lambda size, seed: datasets.gaussian(5, size, seed=seed),
     "gaussian-10": lambda size, seed: datasets.gaussian(10, size, seed=seed),
     "gaussian-100": lambda size, seed: datasets.gaussian(100, size, seed=seed),
+    "gaussian-500": lambda size, seed: datasets.gaussian(500, size, seed=seed),
     "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
     "gaussian-2000": lambda size, seed: datasets.gaussian(2000, size, seed=seed),
     "gaussian-10000": lambda size, seed: datasets.gaussian(10000, size, seed=seed),
@@ -313,6 +314,7 @@ data = inputs[args.dataset](size=args.size, seed=args.seed)
 #data = normalize(data)
 #print(args)
 
+run = None
 if not (args.neptune_name is None or args.neptune_token is None):
     run = neptune.init(
             project=args.neptune_name,
@@ -356,7 +358,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname, r=run
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
@@ -365,7 +367,7 @@ elif args.algorithm == "maf":
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     best_epochs = rqnsf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, num_blocks=args.blocks
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, num_blocks=args.blocks, r=run
     )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])

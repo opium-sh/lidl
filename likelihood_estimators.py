@@ -117,6 +117,7 @@ class LLFlow:
         num_blocks=5,
         report_test_losses=True,
         test_losses_name='',
+        r=None,
     ):
         train_size = int(round(data.shape[0] * (1 - test_size)))
 
@@ -194,7 +195,14 @@ class LLFlow:
 
                 if (epoch - best_epoch) > round(epochs * 2 / 100):
                     print(f"Stopping after {best_epoch} epochs")
+                    if r is not None:
+                        r['deltas_vals'].log(delta)
+                        r['test_loss'].log(float(self.losses[delta][best_epoch]))
                     return best_epoch
+
+        if r is not None:
+            r['deltas_vals'].log(delta)
+            r['test_loss'].log(float(self.losses[delta][best_epoch]))
         return best_epoch
 
 
