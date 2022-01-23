@@ -37,6 +37,7 @@ inputs = {
     "gaussian-10000-20000": lambda size, seed: datasets.gaussian_N_2N(size, N=10000, seed=seed),
     "lollipop": lambda size, seed: datasets.lollipop_dataset(size, seed=seed),
     "lollipop-0": lambda size, seed: datasets.lollipop_dataset_0(size, seed=seed),
+    "lollipop-0-dense-head": lambda size, seed: datasets.lollipop_dataset_0_dense_head(size, seed=seed),
     "sin-01": lambda size, seed: datasets.sin_freq(size, freq=0.1, seed=seed),
     "sin-02": lambda size, seed: datasets.sin_freq(size, freq=0.2, seed=seed),
     "sin-05": lambda size, seed: datasets.sin_freq(size, freq=0.5, seed=seed),

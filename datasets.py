@@ -138,6 +138,25 @@ def lollipop_dataset_0(bs, seed=0):
     return x
 
 
+def lollipop_dataset_0_dense_head(bs, seed=0):
+    np.random.seed(seed)
+    cs = int(0.5 * bs)
+    cp = int(0.7 * bs)
+    r = np.random.uniform(size=cs)
+    fi = np.random.uniform(0, 2 * np.pi, size=cs)
+    x = np.zeros((bs, 2))
+    x[:cs, 0] = r ** 0.5 * np.sin(fi)
+    x[:cs, 1] = r ** 0.5 * np.cos(fi)
+    x += 2
+    stick = np.random.uniform(high=2 - 1 / np.sqrt(2), size=(cp - cs))
+    x[cs:cp, 0] = stick
+    x[cs:cp, 1] = stick
+    x[cp:] = np.random.normal(loc=(-.5, -.5), scale=1e-3, size=(bs-cp, 2))
+    x = np.concatenate([x, np.zeros((x.shape[0], 1))], axis=1)
+    return x
+
+
+
 def uniform_helix_r3(bs, seed=0):
     np.random.seed(seed)
     x = np.zeros((bs, 3))
