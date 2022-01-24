@@ -167,6 +167,10 @@ class LLFlow:
                 losses_file = open(f"{test_losses_name}_{delta}_losses.txt", "w+")
         best_loss = np.inf
         best_epoch = 0
+
+        if r is not None:
+            run['deletas_vals'].log(delta)
+
         for epoch in tqdm.tqdm(range(epochs)):
             dloader = DataLoader(train, batch_size=batch_size)
             for x in dloader:
@@ -176,6 +180,8 @@ class LLFlow:
                 loss = -flow.log_prob(inputs=x).mean()
                 loss.backward()
                 optimizer.step()
+                if r is not None:
+                    r[f"train_loss_{delta}"].log(loss.cpu())
 
             with torch.no_grad():
                 inp = torch.tensor(data, dtype=torch.float32).to(device)
@@ -188,6 +194,8 @@ class LLFlow:
                 if report_test_losses:
                     print(test_loss.item(), file=losses_file)
                     losses_file.flush()
+                if r is not None:
+                    r[f"validation_loss_{delta}"].log(float(self.losses[delta][-1]))
 
                 if test_loss < best_loss:
                     best_loss = test_loss
@@ -196,13 +204,11 @@ class LLFlow:
                 if (epoch - best_epoch) > round(epochs * 2 / 100):
                     print(f"Stopping after {best_epoch} epochs")
                     if r is not None:
-                        r['deltas_vals'].log(delta)
-                        r['test_loss'].log(float(self.losses[delta][best_epoch]))
+                        r[f'top_loss_{delta}'] = float(self.losses[delta][best_epoch])
                     return best_epoch
 
         if r is not None:
-            r['deltas_vals'].log(delta)
-            r['test_loss'].log(float(self.losses[delta][best_epoch]))
+            r[f'top_loss_{delta}'] = float(self.losses[delta][best_epoch])
         return best_epoch
 
 
