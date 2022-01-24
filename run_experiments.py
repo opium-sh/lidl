@@ -12,6 +12,7 @@ inputs = {
     "uniform-10": lambda size, seed: datasets.uniform_N(10, size, seed=seed),
     "uniform-12": lambda size, seed: datasets.uniform_N(12, size, seed=seed),
     "uniform-100": lambda size, seed: datasets.uniform_N(100, size, seed=seed),
+    "uniform-500": lambda size, seed: datasets.uniform_N(500, size, seed=seed),
     "uniform-1000": lambda size, seed: datasets.uniform_N(1000, size, seed=seed),
     "uniform-10000": lambda size, seed: datasets.uniform_N(10000, size, seed=seed),
     "uniform_N_0_1-12": lambda size, seed: datasets.uniform_N_0_1(12, size, seed=seed),
@@ -265,6 +266,12 @@ parser.add_argument(
     help="arguments to skdim"
 )
 
+parser.add_argument(
+    "--gm_max_components",
+    default=200,
+    type=int,
+    help="number of components in gaussian mixture"
+)
 args = parser.parse_args()
 
 not_in_filename = [
@@ -348,7 +355,7 @@ if args.algorithm in skdim_algorithms:
 elif args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag")
+    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag", max_components=args.gm_max_components)
     results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
     gm.save(f"{args.dataset}")
 
