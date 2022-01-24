@@ -169,7 +169,7 @@ class LLFlow:
         best_epoch = 0
 
         if r is not None:
-            run['deletas_vals'].log(delta)
+            r['deletas_vals'].log(delta)
 
         for epoch in tqdm.tqdm(range(epochs)):
             dloader = DataLoader(train, batch_size=batch_size)
