@@ -6,6 +6,7 @@ import numpy as np
 import neptune.new as neptune
 import skdim
 import json
+import time
 
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
@@ -14,6 +15,8 @@ inputs = {
     "uniform-100": lambda size, seed: datasets.uniform_N(100, size, seed=seed),
     "uniform-500": lambda size, seed: datasets.uniform_N(500, size, seed=seed),
     "uniform-1000": lambda size, seed: datasets.uniform_N(1000, size, seed=seed),
+    "uniform-2000": lambda size, seed: datasets.uniform_N(2000, size, seed=seed),
+    "uniform-4000": lambda size, seed: datasets.uniform_N(4000, size, seed=seed),
     "uniform-10000": lambda size, seed: datasets.uniform_N(10000, size, seed=seed),
     "uniform_N_0_1-12": lambda size, seed: datasets.uniform_N_0_1(12, size, seed=seed),
     "gaussian-1": lambda size, seed: datasets.gaussian(1, size, seed=seed),
@@ -23,6 +26,7 @@ inputs = {
     "gaussian-500": lambda size, seed: datasets.gaussian(500, size, seed=seed),
     "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
     "gaussian-2000": lambda size, seed: datasets.gaussian(2000, size, seed=seed),
+    "gaussian-4000": lambda size, seed: datasets.gaussian(4000, size, seed=seed),
     "gaussian-10000": lambda size, seed: datasets.gaussian(10000, size, seed=seed),
     "sphere-7": lambda size, seed: datasets.sphere_7(size, seed=seed),
     "uniform-helix-r3": lambda size, seed: datasets.uniform_helix_r3(size, seed=seed),
@@ -35,6 +39,7 @@ inputs = {
     "gaussian-100-200": lambda size, seed: datasets.gaussian_N_2N(size, N=100, seed=seed),
     "gaussian-500-1000": lambda size, seed: datasets.gaussian_N_2N(size, N=500, seed=seed),
     "gaussian-1000-2000": lambda size, seed: datasets.gaussian_N_2N(size, N=1000, seed=seed),
+    "gaussian-2000-4000": lambda size, seed: datasets.gaussian_N_2N(size, N=2000, seed=seed),
     "gaussian-10000-20000": lambda size, seed: datasets.gaussian_N_2N(size, N=10000, seed=seed),
     "lollipop": lambda size, seed: datasets.lollipop_dataset(size, seed=seed),
     "lollipop-0": lambda size, seed: datasets.lollipop_dataset_0(size, seed=seed),
@@ -275,6 +280,8 @@ parser.add_argument(
 args = parser.parse_args()
 
 not_in_filename = [
+        'json_params',
+        'gm_max_components',
         'neptune_token',
         'neptune_name',
         'ground_truth_const',
@@ -284,6 +291,7 @@ argname = "_".join([f"{k}:{v}" for k, v in vars(args).items() if not k in not_in
 report_filename = (
     f"report_dim_estimate_{argname}.csv"
 )
+print(report_filename)
 
 if args.deltas is not None:
     ldeltas = args.deltas.split(',')
@@ -331,6 +339,8 @@ if not (args.neptune_name is None or args.neptune_token is None):
     )
     for key, value in vars(args).items():
         run[key] = value
+    starttime = time.time()
+
 
 f = open(report_filename, "w")
 if args.algorithm in skdim_algorithms:
@@ -401,6 +411,10 @@ if not (args.neptune_name is None or args.neptune_token is None):
         run['mse'] = mse_val
     if args.algorithm in skdim_algorithms and args.gdim:
         run['gdim'] = gdim
+    ## End measurring time
+    endtime = time.time()
+    run['running_time'] = endtime - starttime
     run.stop()
+
 
 print("\n".join(map(str, results)), file=f)
