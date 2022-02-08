@@ -1,21 +1,32 @@
 import argparse
-
 import datasets
 from datasets import normalize
 from dim_estimators import mle_skl, corr_dim, LIDL, mle_inv
+import numpy as np
+import neptune.new as neptune
+import skdim
+import json
+import time
 
 inputs = {
     "uniform-1": lambda size, seed: datasets.uniform_N(1, size, seed=seed),
     "uniform-10": lambda size, seed: datasets.uniform_N(10, size, seed=seed),
     "uniform-12": lambda size, seed: datasets.uniform_N(12, size, seed=seed),
     "uniform-100": lambda size, seed: datasets.uniform_N(100, size, seed=seed),
+    "uniform-500": lambda size, seed: datasets.uniform_N(500, size, seed=seed),
     "uniform-1000": lambda size, seed: datasets.uniform_N(1000, size, seed=seed),
+    "uniform-2000": lambda size, seed: datasets.uniform_N(2000, size, seed=seed),
+    "uniform-4000": lambda size, seed: datasets.uniform_N(4000, size, seed=seed),
     "uniform-10000": lambda size, seed: datasets.uniform_N(10000, size, seed=seed),
+    "uniform_N_0_1-12": lambda size, seed: datasets.uniform_N_0_1(12, size, seed=seed),
     "gaussian-1": lambda size, seed: datasets.gaussian(1, size, seed=seed),
     "gaussian-5": lambda size, seed: datasets.gaussian(5, size, seed=seed),
     "gaussian-10": lambda size, seed: datasets.gaussian(10, size, seed=seed),
     "gaussian-100": lambda size, seed: datasets.gaussian(100, size, seed=seed),
+    "gaussian-500": lambda size, seed: datasets.gaussian(500, size, seed=seed),
     "gaussian-1000": lambda size, seed: datasets.gaussian(1000, size, seed=seed),
+    "gaussian-2000": lambda size, seed: datasets.gaussian(2000, size, seed=seed),
+    "gaussian-4000": lambda size, seed: datasets.gaussian(4000, size, seed=seed),
     "gaussian-10000": lambda size, seed: datasets.gaussian(10000, size, seed=seed),
     "sphere-7": lambda size, seed: datasets.sphere_7(size, seed=seed),
     "uniform-helix-r3": lambda size, seed: datasets.uniform_helix_r3(size, seed=seed),
@@ -26,10 +37,13 @@ inputs = {
     "gaussian-1-2": lambda size, seed: datasets.gaussian_N_2N(size, N=1, seed=seed),
     "gaussian-10-20": lambda size, seed: datasets.gaussian_N_2N(size, N=10, seed=seed),
     "gaussian-100-200": lambda size, seed: datasets.gaussian_N_2N(size, N=100, seed=seed),
+    "gaussian-500-1000": lambda size, seed: datasets.gaussian_N_2N(size, N=500, seed=seed),
     "gaussian-1000-2000": lambda size, seed: datasets.gaussian_N_2N(size, N=1000, seed=seed),
+    "gaussian-2000-4000": lambda size, seed: datasets.gaussian_N_2N(size, N=2000, seed=seed),
     "gaussian-10000-20000": lambda size, seed: datasets.gaussian_N_2N(size, N=10000, seed=seed),
     "lollipop": lambda size, seed: datasets.lollipop_dataset(size, seed=seed),
     "lollipop-0": lambda size, seed: datasets.lollipop_dataset_0(size, seed=seed),
+    "lollipop-0-dense-head": lambda size, seed: datasets.lollipop_dataset_0_dense_head(size, seed=seed),
     "sin-01": lambda size, seed: datasets.sin_freq(size, freq=0.1, seed=seed),
     "sin-02": lambda size, seed: datasets.sin_freq(size, freq=0.2, seed=seed),
     "sin-05": lambda size, seed: datasets.sin_freq(size, freq=0.5, seed=seed),
@@ -92,12 +106,27 @@ inputs = {
     )
 }
 
+skdim_algorithms = {
+        'skdim_corrint': skdim.id.CorrInt,
+        'skdim_danco': skdim.id.DANCo,
+        'skdim_ess': skdim.id.ESS,
+        'skdim_fishers': skdim.id.FisherS,
+        'skdim_knn': skdim.id.KNN,
+        'skdim_lpca': skdim.id.lPCA,
+        'skdim_mada': skdim.id.MADA,
+        'skdim_mind_ml':skdim.id.MiND_ML,
+        'skdim_mle':skdim.id.MLE,
+        'skdim_mom':skdim.id.MOM,
+        'skdim_tle': skdim.id.TLE,
+        'skdim_twonn': skdim.id.TwoNN,
+}
+
 parser = argparse.ArgumentParser(description="LIDL experiments")
 parser.add_argument(
     "--algorithm",
     default="mle",
     type=str,
-    choices=["mle", "mle-inv", "gm", "rqnsf", "maf", "corrdim"],
+    choices=["mle", "mle-inv", "gm", "rqnsf", "maf", "corrdim"] + list(skdim_algorithms.keys()),
     help="name of the algorithm",
 )
 parser.add_argument(
@@ -129,11 +158,47 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--num_deltas",
+    default=None,
+    type=int,
+    help="number of deltas for density estimator models (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--gdim",
+    default=False,
+    type=bool,
+    help="should skdim try to estimate global dim?",
+)
+
+parser.add_argument(
+    "--neptune_name",
+    default=None,
+    type=str,
+    help="name of the project you want to log to <YOUR_WORKSPACE>/<YOUR_PROJECT>",
+)
+
+parser.add_argument(
+    "--neptune_token",
+    default=None,
+    type=str,
+    help="token to your project",
+)
+
+parser.add_argument(
     "--deltas",
     required=False,
     default=None,
     type=str,
     help="all deltas for density estimator models separated by a comma (does nothing with other algorithms)",
+)
+
+parser.add_argument(
+    "--ground_truth_const",
+    required=False,
+    default=None,
+    type=int,
+    help="if the dimension is constant in every item, you can estimate mse by adding this argument",
 )
 
 parser.add_argument(
@@ -199,14 +264,34 @@ parser.add_argument(
     help="number of blocks in rqnsf"
 )
 
+parser.add_argument(
+    "--json_params",
+    default=None,
+    type=str,
+    help="arguments to skdim"
+)
+
+parser.add_argument(
+    "--gm_max_components",
+    default=200,
+    type=int,
+    help="number of components in gaussian mixture"
+)
 args = parser.parse_args()
 
-argname = "_".join([f"{k}:{v}" for k, v in vars(args).items()])
+not_in_filename = [
+        'json_params',
+        'gm_max_components',
+        'neptune_token',
+        'neptune_name',
+        'ground_truth_const',
+        'gdim']
+argname = "_".join([f"{k}:{v}" for k, v in vars(args).items() if not k in not_in_filename])
 
 report_filename = (
     f"report_dim_estimate_{argname}.csv"
 )
-f = open(report_filename, "w")
+print(report_filename)
 
 if args.deltas is not None:
     ldeltas = args.deltas.split(',')
@@ -218,13 +303,16 @@ if args.deltas is not None:
         deltas.append(fdelta)
 elif args.delta is not None:
     assert args.delta > 0, "delta must be greater than 0"
-    deltas = [
-        args.delta / 2.0,
-        args.delta / 1.41,
-        args.delta,
-        args.delta * 1.41,
-        args.delta * 2.0,
-    ]
+    if args.num_deltas is None:
+        deltas = [
+            args.delta / 2.0,
+            args.delta / 1.41,
+            args.delta,
+            args.delta * 1.41,
+            args.delta * 2.0,
+        ]
+    else:
+        deltas = np.geomspace(args.delta/2, args.delta*2, args.num_deltas)
 else:
     deltas = [
         0.010000,
@@ -239,13 +327,45 @@ else:
 
 
 data = inputs[args.dataset](size=args.size, seed=args.seed)
-data = normalize(data)
-print(args)
+#data = normalize(data)
+#print(args)
 
-if args.algorithm == "gm":
+run = None
+if not (args.neptune_name is None or args.neptune_token is None):
+    run = neptune.init(
+            project=args.neptune_name,
+            api_token=args.neptune_token,
+            source_files=['datasets.py', 'dim_estimators.py', 'likelihood_estimators.py', 'run_experiments.py', 's3.sh'],
+    )
+    for key, value in vars(args).items():
+        run[key] = value
+    starttime = time.time()
+
+
+f = open(report_filename, "w")
+if args.algorithm in skdim_algorithms:
+    print(args.algorithm, file=f)
+    if args.json_params is not None:
+        with open(args.json_params) as f_skdim_args:
+            params = json.load(f_skdim_args)
+    else:
+        params = dict()
+    if not (args.neptune_name is None or args.neptune_token is None):
+        run['skdim_params'] = params
+
+    model = skdim_algorithms[args.algorithm](**params)
+    ldims = model.fit_transform_pw(data)
+
+    if args.gdim:
+        model = skdim_algorithms[args.algorithm](**params)
+        gdim = model.fit_transformw(data)
+
+    results = ldims
+
+elif args.algorithm == "gm":
     gm = LIDL("gaussian_mixture")
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag")
+    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag", max_components=args.gm_max_components)
     results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
     gm.save(f"{args.dataset}")
 
@@ -256,7 +376,7 @@ elif args.algorithm == "corrdim":
 elif args.algorithm == "maf":
     maf = LIDL("maf")
     best_epochs = maf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname, r=run
     )
     print("maf", file=f)
     results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
@@ -265,7 +385,7 @@ elif args.algorithm == "maf":
 elif args.algorithm == "rqnsf":
     rqnsf = LIDL("rqnsf")
     best_epochs = rqnsf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, num_blocks=args.blocks
+        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, num_blocks=args.blocks, r=run
     )
     print("rqnsf", file=f)
     results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
@@ -279,5 +399,22 @@ elif args.algorithm == "mle":
 elif args.algorithm == "mle-inv":
     print(f"mle-inv:k={args.k}", file=f)
     results = mle_inv(data, k=args.k)
+
+
+if not (args.neptune_name is None or args.neptune_token is None):
+    for lid in results:
+        run['lids'].log(lid)
+    if args.ground_truth_const is not None:
+        def mse(a, b):
+            return ((a - b) ** 2).mean()
+        mse_val = mse(np.array(results), np.full(len(results), args.ground_truth_const))
+        run['mse'] = mse_val
+    if args.algorithm in skdim_algorithms and args.gdim:
+        run['gdim'] = gdim
+    ## End measurring time
+    endtime = time.time()
+    run['running_time'] = endtime - starttime
+    run.stop()
+
 
 print("\n".join(map(str, results)), file=f)
