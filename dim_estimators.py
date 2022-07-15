@@ -64,7 +64,7 @@ class LIDL:
         sort_deltas = np.argsort(np.array(deltas))
         lls = list()
         losses = list()
-        tq = tqdm(deltas, leave=False, unit='delta')
+        tq = tqdm(deltas, position=0, leave=False, unit='delta')
         for delta in tq:
             tq.set_description(f"delta: {delta}")
             ll, score = self.model(delta=delta, dataset=train_dataset, test=test)
