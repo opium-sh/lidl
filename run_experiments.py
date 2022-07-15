@@ -363,32 +363,52 @@ if args.algorithm in skdim_algorithms:
     results = ldims
 
 elif args.algorithm == "gm":
-    gm = LIDL("gaussian_mixture")
+    #TODO fix arguments (convariance)
+    gm = LIDL(
+        model_type="gm",
+        runs=1,
+        covariance_type="diag",
+        max_components=args.gm_max_components)
     print(f"gm", file=f)
-    gm.run_on_deltas(deltas, data=data, samples=data, runs=1, covariance_type="diag", max_components=args.gm_max_components)
-    results = gm.dims_on_deltas(deltas, epoch=0, total_dim=data.shape[1])
-    gm.save(f"{args.dataset}")
+    results = gm(deltas=deltas, train_dataset=data, test=data)
+    #gm.save(f"{args.dataset}")
 
 elif args.algorithm == "corrdim":
     print("corrdim", file=f)
     results = corr_dim(data)
 
 elif args.algorithm == "maf":
-    maf = LIDL("maf")
-    best_epochs = maf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, test_losses_name=argname, r=run
-    )
+    maf = LIDL(
+        model_type="maf",
+        device=args.device,
+        num_layers=args.layers,
+        lr=args.lr,
+        hidden=args.hidden,
+        epochs=args.epochs,
+        batch_size=args.bs)
     print("maf", file=f)
-    results = maf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
+    results = maf(
+        deltas=deltas,
+        train_dataset=data,
+        test=data)
     #maf.save(f"{args.algorithm}_{args.dataset}")
 
 elif args.algorithm == "rqnsf":
-    rqnsf = LIDL("rqnsf")
-    best_epochs = rqnsf.run_on_deltas(
-        deltas, data=data, device=args.device, num_layers=args.layers, lr=args.lr, hidden=args.hidden, epochs=args.epochs, batch_size=args.bs, num_blocks=args.blocks, r=run
-    )
+    rqnsf = LIDL(
+        model_type="rqnsf",
+        device=args.device,
+        num_layers=args.layers,
+        lr=args.lr,
+        hidden=args.hidden,
+        epochs=args.epochs,
+        batch_size=args.bs,
+        num_blocks=args.blocks)
+    results = rqnsf(
+        deltas=deltas,
+        train_dataset=data,
+        test=data)
     print("rqnsf", file=f)
-    results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
+    #results = rqnsf.dims_on_deltas(deltas, epoch=best_epochs, total_dim=data.shape[1])
     #rqnsf.save(f"{args.algorithm}_{args.dataset}")
 
 elif args.algorithm == "mle":
