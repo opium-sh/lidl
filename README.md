@@ -34,14 +34,18 @@ We propose Local Intrinsic Dimension estimation using approximate Likelihood (LI
 
 # Repository
 
+## Examples
+
+Look at examples/swiss_roll.ipynb and examples/lollipop.ipynb
+
 ## Quick Start
 
 ```sh
 pip install -r requirements.txt
-python run_experiments.py dataset=lollipop-0 algorithm=rqnsf size=10000	--delta 0.05 --num_deltas 12 --device cuda
+python run_experiments.py dataset=lollipop-0 algorithm=rqnsf size=1000 --delta 0.05 --num_deltas 12 --device cuda
 ```
 
-Dimension estimations of all samples will appear in a simple csv file in main directory. Running the default experiment can take 2-6h.
+Dimension estimations of samples of the lollipop dataset will appear in a simple csv file in main directory. Running the default experiment should take less than 10 minutes.
 
 For more details run
 ```
@@ -51,14 +55,12 @@ python run_experiments.py -h
 
 ## Parameters
 
-The safest parameters to experiment with are algorithm are
-- dataset: there are multiple datasets available (implemented in datasets.py)
+The safest parameters to experiment with are:
+- dataset: there are multiple datasets available (implemented in datasets.py, you can list them with `python run_experiments.py -h`)
 - algorithm: (rqnsf, gm or maf if you want to use LIDL). We've also added some of the most common algorithms used for LID estimation (mle, corrdim)
 - size: smaller dataset size can increase speed, but reduce accuracy
 
 
 num_deltas increases the accuracy at the cost of running time.
 
-## Using LID in your python code
 
-Loot at examples/swiss_roll.ipynb and examples/lollipop.ipynb
