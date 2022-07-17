@@ -130,8 +130,8 @@ class LLFlow:
         optimizer = optim.Adam(flow.parameters(), lr=self.lr)
 
         train_tensor = torch.tensor(train, dtype=torch.float32)
-        val_tensor = torch.tensor(val, dtype=torch.float32)
-        test_tensor = torch.tensor(test, dtype=torch.float32)
+        val_tensor = torch.tensor(val, dtype=torch.float32, device=self.device)
+        test_tensor = torch.tensor(test, dtype=torch.float32, device=self.device)
 
         best_loss = np.inf
         best_epoch = 0
