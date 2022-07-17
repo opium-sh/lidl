@@ -2,6 +2,9 @@
 
 Piotr Tempczyk, Rafał Michaluk, Łukasz Garncarek, Przemysław Spurek, Jacek Tabor, Adam Goliński
 
+in ICML2022: https://icml.cc/Conferences/2022/Schedule?showEvent=18215
+
+https://arxiv.org/abs/2206.14882
 
 ## Method
 
