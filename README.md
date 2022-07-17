@@ -19,7 +19,7 @@ We propose Local Intrinsic Dimension estimation using approximate Likelihood (LI
 
 | <img width="403" alt="Screenshot 2022-07-17 at 03 52 08" src="https://user-images.githubusercontent.com/15023195/179380727-f497f8b0-d6cf-4f09-a32c-f55ac79ce87f.png"> | 
 |:--:| 
-|  Illustration of LIDL’s core insight. [Top] Three uniform distributions pS supported respectively on a square, interval, and a point, with intrinsic dimensions 2, 1, 0. [Middle/bottom] Perturbed densities $ρ_δ$ and $ρ_{2δ}$ resulting from addition of Gaussian noise with different noise magnitudes: $δ$ and $2δ$. Our core insight is that the difference between the densities $ρ_δ(x)$ and $ρ_{2δ}(x)$ at any point x depends on the local intrinsic dimension (LID) at that point. Consider point x = (0, 0). For the left column, that difference is zero; for the middle one, the density is halved; for the right one, it is quartered. We leverage this mechanism to estimate LID. |
+|  Illustration of LIDL’s core insight. [Top] Three uniform distributions $p_S$ supported respectively on a square, interval, and a point, with intrinsic dimensions 2, 1, 0. [Middle/bottom] Perturbed densities $ρ_δ$ and $ρ_{2δ}$ resulting from addition of Gaussian noise with different noise magnitudes: $δ$ and $2δ$. Our core insight is that the difference between the densities $ρ_δ(x)$ and $ρ_{2δ}(x)$ at any point x depends on the local intrinsic dimension (LID) at that point. Consider point x = (0, 0). For the left column, that difference is zero; for the middle one, the density is halved; for the right one, it is quartered. We leverage this mechanism to estimate LID. |
 
 
 
@@ -39,11 +39,13 @@ We propose Local Intrinsic Dimension estimation using approximate Likelihood (LI
 
 ## Examples
 
-Look at examples/swiss_roll.ipynb and examples/lollipop.ipynb
+The easiest way to use this repository is to look at the examples: examples/swiss_roll.ipynb and examples/lollipop.ipynb
 
 ## Quick Start
 
 ```sh
+git clone https://github.com/opium-sh/lidl.git
+cd lidl
 pip install -r requirements.txt
 python run_experiments.py dataset=lollipop-0 algorithm=rqnsf size=1000 --delta 0.05 --num_deltas 12 --device cuda
 ```
