@@ -39,7 +39,7 @@ We propose Local Intrinsic Dimension estimation using approximate Likelihood (LI
 
 ## Examples
 
-The easiest way to use this repository is to look at the examples: examples/swiss_roll.ipynb and examples/lollipop.ipynb
+Before using this repository we recommend looking at the examples: examples/swiss_roll.ipynb and examples/lollipop.ipynb
 
 ## Quick Start
 
