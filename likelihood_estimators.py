@@ -34,13 +34,16 @@ class LLGaussianMixtures:
         self.max_components = max_components
         self.covariance_type = covariance_type
 
-    def __call__(self, delta, dataset, test):
+    def __call__(self, delta, dataset, test, verbose=False):
         train, val = split_dataset(dataset, self.val_size)
         # we'll pick the best run
         best_score_per_run = -np.inf
-        tq1 = tqdm.tqdm(range(self.runs), position=1, leave=False, unit='run')
+        if verbose:
+            tq1 = tqdm.tqdm(range(self.runs), position=1, leave=False, unit='run')
+        else:
+            tq1 = range(self.runs)
         for run in tq1:
-            tq1.set_description(f"run: {run + 1}")
+            if verbose: tq1.set_description(f"run: {run + 1}")
             best_score = -np.inf
             best_comps = 0
             n_comps = list(range(1, self.max_components + 1))
@@ -50,9 +53,12 @@ class LLGaussianMixtures:
             val_with_noise = val + np.random.randn(*val.shape) * delta
             #train_val_with_noise = np.concatenate((train_with_noise, val_with_noise), dim=0)
 
-            tq2 = tqdm.tqdm(n_comps, position=2, leave=False, unit='num_comp')
+            if verbose:
+                tq2 = tqdm.tqdm(n_comps, position=2, leave=False, unit='num_comp')
+            else:
+                tq2 = n_comps
             for n_comp in tq2:
-                tq2.set_description(f"components: {n_comp}")
+                if verbose: tq2.set_description(f"components: {n_comp}")
                 model = GaussianMixture(n_components=n_comp, covariance_type=self.covariance_type)
                 model.fit(train_with_noise)
                 score = model.score(val_with_noise)
@@ -120,7 +126,7 @@ class LLFlow:
         return flow
 
     # def run(self, data, samples, delta=0.05, test_size = 0.1, num_layers=10, lr=0.0001, epochs=10_000, device='cpu'):
-    def __call__(self, delta, dataset, test):
+    def __call__(self, delta, dataset, test, verbose=False):
         train, val = split_dataset(dataset, self.val_size)
         if test.shape[1] != dataset.shape[1]:
             raise ValueError(f"train and test datasets have different number of features: \
@@ -138,12 +144,18 @@ class LLFlow:
 
         losses = list()
         results = list()
-        tq1 = tqdm.tqdm(range(self.epochs), position=1, leave=False)
+        if verbose:
+            tq1 = tqdm.tqdm(range(self.epochs), position=1, leave=False)
+        else:
+            tq1 = range(self.epochs)
         for epoch in tq1:
-            tq1.set_description(f"epoch: {epoch + 1}")
-            tq2 = tqdm.tqdm(DataLoader(train_tensor, batch_size=self.batch_size), position=2, leave=False)
+            if verbose: tq1.set_description(f"epoch: {epoch + 1}")
+            if verbose:
+                tq2 = tqdm.tqdm(DataLoader(train_tensor, batch_size=self.batch_size), position=2, leave=False)
+            else:
+                tq2 = DataLoader(train_tensor, batch_size=self.batch_size)
             for x in tq2:
-                tq2.set_description("batch")
+                if verbose: tq2.set_description("batch")
                 x = x + torch.randn_like(x) * delta
                 x = x.to(self.device)
                 optimizer.zero_grad()
@@ -167,6 +179,6 @@ class LLFlow:
                 if (epoch - best_epoch) > round(self.epochs * 2 / 100):
                     print(f"Stopping after {best_epoch} epochs")
                     return results[best_epoch], losses[best_epoch]
-            tq1.set_postfix_str(f"loss: {losses[best_epoch]}")
+            if verbose: tq1.set_postfix_str(f"loss: {losses[best_epoch]}")
 
         return results[best_epoch], losses[best_epoch]
