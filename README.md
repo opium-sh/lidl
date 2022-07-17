@@ -69,3 +69,14 @@ The safest parameters to experiment with are:
 num_deltas increases the accuracy at the cost of running time.
 
 
+## Citation
+```
+@inproceedings{tempczyk2022lidl,
+  title={LIDL: Local Intrinsic Dimension Estimation Using Approximate Likelihood},
+  author={Tempczyk, Piotr and Michaluk, Rafa{\l} and Garncarek, Lukasz and Spurek, Przemys{\l}aw and Tabor, Jacek and Golinski, Adam},
+  booktitle={International Conference on Machine Learning},
+  pages={21205--21231},
+  year={2022},
+  organization={PMLR}
+}
+```
