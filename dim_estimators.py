@@ -9,7 +9,7 @@ from tqdm import tqdm
 from dimensions import (
     intrinsic_dim_sample_wise_double_mle,
 )
-from likelihood_estimators import LLGaussianMixtures, LLFlow, LLGlow
+from likelihood_estimators import LLGaussianMixtures, LLFlow
 
 
 def mle_skl(data, k):
@@ -49,44 +49,39 @@ def corr_dim(data, l_perc=0.000001, u_perc=0.01):
 
 
 class LIDL:
-    def __init__(self, model_type):
-        if model_type == "gaussian_mixture":
-            self.model = LLGaussianMixtures()
+    def __init__(self, model_type, **model_args):
+        if model_type == "gm":
+            self.model = LLGaussianMixtures(**model_args)
         elif model_type == "rqnsf":
-            self.model = LLFlow("rqnsf")
+            self.model = LLFlow(flow_type="rqnsf", **model_args)
         elif model_type == "maf":
-            self.model = LLFlow("maf")
-        elif model_type == "glow":
-            self.model = LLGlow()
+            self.model = LLFlow(flow_type="maf", **model_args)
         else:
-            assert False, "incorrect model type"
+            raise ValueError(f"incorrect model type: {model_type}")
 
-    def run_on_deltas(self, deltas, **model_args):
-        best_epochs = dict()
-        for delta in deltas:
-            best_epoch = self.model.run(delta=delta, **model_args)
-            best_epochs[delta] = best_epoch
-        return best_epochs
+    def __call__(self, deltas, train_dataset, test):
+        total_dim = train_dataset.shape[1]
+        sort_deltas = np.argsort(np.array(deltas))
+        lls = list()
+        losses = list()
+        tq = tqdm(deltas, position=0, leave=False, unit='delta')
+        for delta in tq:
+            tq.set_description(f"delta: {delta}")
+            ll, score = self.model(delta=delta, dataset=train_dataset, test=test)
+            lls.append(ll)
+            losses.append(score)
+        lls = np.array(lls)
+        print(f"loss: {sum(losses)/len(losses)}")
 
-    def dims_on_deltas(self, deltas, epoch, total_dim):
-        indsort = np.argsort(np.array(deltas))
-        if isinstance(epoch, dict):
-            lls = np.array(
-                [self.model.results[delta][epoch[delta]] for delta in deltas]
-            )
-        else:
-            lls = np.array([self.model.results[delta][epoch] for delta in deltas])
-        lls = lls[indsort]
-        deltas = np.array(deltas)[indsort]
+        lls = lls[sort_deltas]
+        deltas = np.array(deltas)[sort_deltas]
 
         lls = lls.transpose()
         dims = list()
         for i in range(lls.shape[0]):
             good_inds = ~np.logical_or(np.isnan(lls[i]), np.isinf(lls[i]))
             if ~good_inds.all():
-                print(
-                    f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}, epochs: {epoch}"
-                )
+                print(f"[WARNING] some log likelihoods are incorrect, deltas: {deltas}")
             ds = np.log(deltas[good_inds])
             ll = lls[i][good_inds]
             if ll.size < 2:
@@ -98,11 +93,3 @@ class LIDL:
                 dims.append(total_dim - regr.coef_[0])
 
         return np.array(dims)
-
-    def save(self, name):
-        with open(f"{name}_lidl.obj", "wb") as f:
-            pickle.dump(self.__dict__, f)
-
-    def load(self, name):
-        with open(f"{name}_lidl.obj", "rb") as f:
-            self.__dict__ = pickle.load(f)
