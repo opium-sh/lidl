@@ -38,7 +38,7 @@ class LLGaussianMixtures:
         train, val = split_dataset(dataset, self.val_size)
         # we'll pick the best run
         best_score_per_run = -np.inf
-        tq1 = tqdm.tqdm(range(self.runs), position=0, leave=False, unit='run')
+        tq1 = tqdm.tqdm(range(self.runs), position=1, leave=False, unit='run')
         for run in tq1:
             tq1.set_description(f"run: {run + 1}")
             best_score = -np.inf
@@ -50,7 +50,7 @@ class LLGaussianMixtures:
             val_with_noise = val + np.random.randn(*val.shape) * delta
             #train_val_with_noise = np.concatenate((train_with_noise, val_with_noise), dim=0)
 
-            tq2 = tqdm.tqdm(n_comps, position=0, leave=False, unit='num_comp')
+            tq2 = tqdm.tqdm(n_comps, position=2, leave=False, unit='num_comp')
             for n_comp in tq2:
                 tq2.set_description(f"components: {n_comp}")
                 model = GaussianMixture(n_components=n_comp, covariance_type=self.covariance_type)
@@ -138,10 +138,10 @@ class LLFlow:
 
         losses = list()
         results = list()
-        tq1 = tqdm.tqdm(range(self.epochs), position=0, leave=False)
+        tq1 = tqdm.tqdm(range(self.epochs), position=1, leave=False)
         for epoch in tq1:
             tq1.set_description(f"epoch: {epoch + 1}")
-            tq2 = tqdm.tqdm(DataLoader(train_tensor, batch_size=self.batch_size), position=0, leave=False)
+            tq2 = tqdm.tqdm(DataLoader(train_tensor, batch_size=self.batch_size), position=2, leave=False)
             for x in tq2:
                 tq2.set_description("batch")
                 x = x + torch.randn_like(x) * delta
