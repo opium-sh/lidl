@@ -1,8 +1,8 @@
-neptune-client==0.14.3
+neptune-client==0.16.16
 nflows==0.14
-numba==0.55.1
+numba==0.56.4
 scikit-dimension==0.3
-scikit-learn==1.0.2
+scikit-learn==1.2.1
 sklearn==0.0
-torch==1.10.2
-tqdm==4.62.3
+torch==1.13.1
+tqdm==4.64.1
