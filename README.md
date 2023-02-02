@@ -12,7 +12,7 @@ Based on [LIDL: Local Intrinsic Dimension Estimation Using Approximate Likelihoo
 git clone ....
 cd ....
 pip install -r requirements.txt
-python run_experiments.py dataset=lollipop-0 algorithm=rqnsf size=1000 --delta 0.05 --num_deltas 12 --device cuda
+python run_experiments.py --dataset=lollipop-0 --algorithm=rqnsf --size=1000 --delta 0.05 --num_deltas 12 --device cuda
 ```
 
 Dimension estimations of samples of the lollipop dataset will appear in a simple csv file in main directory. Running the default experiment should take less than 10 minutes.
